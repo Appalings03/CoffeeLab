@@ -1,0 +1,3233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Coffee Impact Rating &amp; Supply Chain Transparency Explorer | Group 3 COIL</title>
+  <!-- Tailwind CSS for responsive utility layout -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Editorial & Data Journalism Typography: Newsreader (Serif), Inter (Sans), JetBrains Mono (Tabular Data) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ==========================================================================
+       DESIGN TOKENS: Coffee Parchment, Roasted Espresso & Nutri-Score Clarity
+       ========================================================================== */
+    :root {
+      --bg-parchment: #F7F3EC;
+      --bg-surface: #FFFDF9;
+      --bg-well: #EFE9DD;
+      --bg-well-hover: #E6DEC8;
+      --border-warm: #DFD5C5;
+      --border-strong: #C5B69E;
+      --ink-espresso: #1D1510;
+      --ink-roast: #4E3E33;
+      --ink-muted: #7A6A5D;
+      --accent-copper: #B45309;
+      --accent-copper-soft: #FEF3C7;
+      --accent-forest: #1B5E3A;
+      --accent-forest-soft: #E6F4EC;
+
+      /* Official Nutri-Score Grade Palette */
+      --grade-a: #038141;
+      --grade-b: #85BB2F;
+      --grade-c: #FECB02;
+      --grade-d: #EE8100;
+      --grade-e: #E63E11;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--bg-parchment);
+      color: var(--ink-espresso);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.55;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3, .font-editorial {
+      font-family: 'Newsreader', Georgia, serif;
+      letter-spacing: -0.015em;
+    }
+
+    .font-mono-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Editorial Card & Surface Styling */
+    .paper-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-warm);
+      border-radius: 14px;
+      box-shadow: 0 2px 10px rgba(29, 21, 16, 0.04);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+
+    .paper-card-interactive {
+      cursor: pointer;
+    }
+
+    .paper-card-interactive:hover {
+      border-color: var(--accent-copper);
+      box-shadow: 0 6px 20px rgba(29, 21, 16, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .paper-card-active {
+      border: 2px solid var(--accent-copper) !important;
+      background-color: #FFFBF2 !important;
+      box-shadow: 0 8px 24px rgba(180, 83, 9, 0.12) !important;
+    }
+
+    .bsource-btn {
+      transition: transform 0.24s ease, background-color 0.28s ease,
+        border-color 0.28s ease, box-shadow 0.28s ease;
+    }
+
+    .bsource-btn.paper-card-active {
+      transform: translateY(-2px);
+    }
+
+    .brazil-source-detail-content {
+      min-width: 0;
+    }
+
+    /* Excel-Inspired Sheet Navigation Tabs */
+    .sheet-tab {
+      --tab-accent: var(--accent-copper);
+      --tab-tint: #FFFBF2;
+      --tab-border: var(--border-warm);
+      display: flex;
+      flex: 1 1 18%;
+      min-width: 0;
+      position: relative;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: 10px 10px 0 0;
+      border: 1px solid transparent;
+      border-bottom: none;
+      font-size: clamp(0.68rem, 0.85vw, 0.82rem);
+      font-weight: 600;
+      color: var(--ink-roast);
+      background-color: rgba(239, 233, 221, 0.65);
+      cursor: pointer;
+      white-space: normal;
+      text-align: left;
+      min-height: 56px;
+      transition: background-color 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+        color 0.32s ease, border-color 0.32s ease, box-shadow 0.32s ease,
+        transform 0.2s ease;
+    }
+
+    .sheet-tab[data-sheet="sheet-1"] {
+      --tab-accent: #B45309;
+      --tab-tint: #FFF7ED;
+      --tab-border: #E9B985;
+    }
+
+    .sheet-tab[data-sheet="sheet-2"] {
+      --tab-accent: #1B5E3A;
+      --tab-tint: #F0F8F2;
+      --tab-border: #A9D0B7;
+    }
+
+    .sheet-tab[data-sheet="sheet-3"] {
+      --tab-accent: #4E3E33;
+      --tab-tint: #F5F1EC;
+      --tab-border: #C9B9A8;
+    }
+
+    .sheet-tab[data-sheet="sheet-4"] {
+      --tab-accent: #038141;
+      --tab-tint: #EFF9F2;
+      --tab-border: #A6D4B7;
+    }
+
+    .sheet-tab[data-sheet="sheet-5"] {
+      --tab-accent: #B45309;
+      --tab-tint: #FFF7ED;
+      --tab-border: #E9B985;
+    }
+
+    .sheet-tab-number {
+      transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), filter 0.32s ease;
+    }
+
+    .sheet-tab.active .sheet-tab-number {
+      transform: scale(1.08);
+      filter: saturate(1.15);
+    }
+
+    .sheet-tab-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+      min-width: 0;
+      line-height: 1.25;
+    }
+
+    .sheet-tab-title,
+    .sheet-tab-description {
+      min-width: 0;
+    }
+
+    .sheet-tab-description {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 400;
+      color: var(--ink-muted);
+    }
+
+    @media (max-width: 1023px) {
+      .sheet-tab {
+        flex-basis: 30%;
+      }
+    }
+
+    @media (max-width: 767px) {
+      .sheet-tab {
+        flex-basis: calc(50% - 0.25rem);
+        padding: 0.55rem 0.65rem;
+        font-size: 0.78rem;
+      }
+
+      .sheet-tab-description {
+        display: none;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .sheet-tab {
+        flex-basis: 100%;
+      }
+    }
+
+    .sheet-tab:hover {
+      background-color: var(--bg-well);
+      color: var(--ink-espresso);
+    }
+
+    .sheet-tab.active {
+      background-color: var(--tab-tint);
+      color: var(--tab-accent);
+      border-color: var(--tab-border);
+      box-shadow: 0 -3px 12px rgba(29, 21, 16, 0.07);
+    }
+
+    .sheet-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background-color: var(--tab-tint);
+    }
+
+    /* Nutri-Score Pill & Scale Badges */
+    .grade-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      border-radius: 8px;
+      letter-spacing: 0.02em;
+    }
+
+    .grade-A { background-color: var(--grade-a); color: #FFFFFF; }
+    .grade-B { background-color: var(--grade-b); color: #FFFFFF; }
+    .grade-C { background-color: var(--grade-c); color: #1D1510; }
+    .grade-D { background-color: var(--grade-d); color: #FFFFFF; }
+    .grade-E { background-color: var(--grade-e); color: #FFFFFF; }
+
+    /* Nutri-Score Horizontal 5-Letter Strip */
+    .nutri-strip {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 10px;
+      overflow: visible;
+      background: #E5E0D8;
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .nutri-letter {
+      width: 30px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.9rem;
+      border-radius: 6px;
+      opacity: 0.42;
+      transition: all 0.2s ease;
+    }
+
+    .nutri-letter.selected {
+      opacity: 1;
+      transform: scale(1.18);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.22);
+      border: 2px solid #FFFFFF;
+      z-index: 2;
+    }
+
+    /* Smooth Tab Content Transition */
+    .sheet-panel {
+      display: none;
+    }
+
+    .sheet-panel.active {
+      display: block;
+    }
+
+    /* Progress Bar Smooth Transition */
+    .bar-fill {
+      transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* Custom Form Inputs for Live Spreadsheet */
+    .excel-input {
+      background-color: #FFFDF9;
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      padding: 0.35rem 0.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875rem;
+      color: var(--ink-espresso);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .excel-input:focus {
+      outline: none;
+      border-color: var(--accent-copper);
+      box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.15);
+    }
+
+    /* Hide scrollbar for clean horizontal tab scrolling on mobile */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Progressive reveal for content inside the active page */
+    .reveal-ready {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.65s ease, transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .reveal-ready.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .paper-card,
+    .sheet-tab,
+    button,
+    .vmodel-btn,
+    .ccoffee-btn,
+    .bsource-btn {
+      transform-origin: center;
+    }
+
+    button:not(.sheet-tab),
+    .vmodel-btn,
+    .ccoffee-btn {
+      transition: transform 0.18s ease, background-color 0.18s ease,
+        border-color 0.18s ease, box-shadow 0.18s ease, color 0.18s ease;
+    }
+
+    button:active,
+    .sheet-tab:active,
+    .vmodel-btn:active,
+    .ccoffee-btn:active {
+      transform: scale(0.97);
+    }
+
+    .paper-card-interactive {
+      will-change: transform;
+    }
+
+    .paper-card-interactive:hover {
+      transform: translateY(-3px);
+    }
+
+    .stage-inspector-content {
+      min-width: 0;
+    }
+
+    .stage-step-card .stage-card-arrow {
+      transition: transform 0.2s ease;
+    }
+
+    .stage-step-card:hover .stage-card-arrow,
+    .stage-step-card[aria-pressed="true"] .stage-card-arrow {
+      transform: translateX(4px);
+    }
+
+    .stage-step-card[aria-pressed="true"] {
+      transform: translateY(-2px);
+    }
+
+    .stage-step-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .stage-step-card[aria-pressed="true"]:hover {
+      transform: translateY(-2px);
+    }
+
+    .stage-step-card:active {
+      transform: translateY(-1px) scale(0.97);
+    }
+
+    .stage-step-card[aria-pressed="true"]:active {
+      transform: scale(0.97);
+    }
+
+    #scroll-progress {
+      position: fixed;
+      z-index: 80;
+      top: 0;
+      left: 0;
+      height: 3px;
+      width: 0;
+      background: linear-gradient(90deg, var(--grade-d), var(--grade-c), var(--accent-forest));
+      box-shadow: 0 1px 6px rgba(180, 83, 9, 0.25);
+    }
+
+    #back-to-top {
+      position: fixed;
+      z-index: 70;
+      right: 1.25rem;
+      bottom: 1.25rem;
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      border: 1px solid var(--border-strong);
+      background: var(--ink-espresso);
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(29, 21, 16, 0.18);
+      opacity: 0;
+      transform: translateY(16px) scale(0.9);
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease, background 0.18s ease;
+    }
+
+    #back-to-top.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    #back-to-top:hover {
+      background: var(--accent-copper);
+    }
+
+    .back-to-top-arrow {
+      display: inline-block;
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+
+    .ripple {
+      position: absolute;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.45);
+      transform: scale(0);
+      animation: rippleEffect 0.55s ease-out;
+      pointer-events: none;
+    }
+
+    @keyframes rippleEffect {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+
+      .sheet-tab {
+        transition-property: background-color, color, border-color, box-shadow !important;
+        transition-duration: 0.16s !important;
+      }
+
+      .sheet-tab-number {
+        transition: none !important;
+        transform: none !important;
+        filter: none !important;
+      }
+
+      .reveal-ready {
+        opacity: 1;
+        transform: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="scroll-progress" aria-hidden="true"></div>
+  <button id="back-to-top" type="button" aria-label="Back to top" title="Back to top"><span class="back-to-top-arrow" aria-hidden="true">&uarr;</span></button>
+
+  <!-- ========================================================================
+       EDITORIAL MASTHEAD HEADER
+       ======================================================================== -->
+  <header class="border-b border-[#DFD5C5] bg-[#EFE9DD]/80 backdrop-blur-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-5">
+      <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+        <div>
+          <div class="flex flex-wrap items-center gap-2 mb-2">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#1D1510] text-[#FFFDF9]">
+              <span class="w-2 h-2 rounded-full bg-[#85BB2F]"></span>
+              COIL Project • Group 3 (CoffeeLab)
+            </span>
+            <span class="text-xs font-medium text-[#57483D] bg-[#FFFDF9] border border-[#DFD5C5] px-2.5 py-1 rounded-full">
+              ESEG São Paulo × HEPH-Condorcet Belgium
+            </span>
+          </div>
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1D1510] leading-tight">
+            Coffee Impact Rating &amp; Supply Chain Transparency Explorer
+          </h1>
+          <p class="mt-1.5 text-sm sm:text-base text-[#4E3E33] max-w-3xl">
+            Bridging the transparency gap between Brazilian coffee farms and Belgian retail shelves: explore where data breaks down, how value is distributed, and test our Nutri-Score-inspired 6-KPI rating scorecard live.
+          </p>
+        </div>
+
+        <!-- Quick Key Benchmark Pills -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-2 shrink-0">
+          <div class="bg-[#FFFDF9] border border-[#DFD5C5] rounded-xl px-3 py-2">
+            <div class="text-[11px] uppercase tracking-wider text-[#7A6A5D] font-semibold">Belgium Imports (2024)</div>
+            <div class="font-mono-num text-base font-bold text-[#1D1510]">282,000 t <span class="text-xs font-normal text-[#1B5E3A]">(#4 EU)</span></div>
+          </div>
+          <div class="bg-[#FFFDF9] border border-[#DFD5C5] rounded-xl px-3 py-2">
+            <div class="text-[11px] uppercase tracking-wider text-[#7A6A5D] font-semibold">Antwerp Storage</div>
+            <div class="font-mono-num text-base font-bold text-[#1D1510]">Up to 40% <span class="text-xs font-normal text-[#B45309]">Brazil</span></div>
+          </div>
+          <div class="bg-[#FFFDF9] border border-[#DFD5C5] rounded-xl px-3 py-2">
+            <div class="text-[11px] uppercase tracking-wider text-[#7A6A5D] font-semibold">Top 15 Disclosure</div>
+            <div class="font-mono-num text-base font-bold text-[#E63E11]">0 / 15 <span class="text-xs font-normal text-[#4E3E33]">share prices</span></div>
+          </div>
+          <div class="bg-[#FFFDF9] border border-[#DFD5C5] rounded-xl px-3 py-2">
+            <div class="text-[11px] uppercase tracking-wider text-[#7A6A5D] font-semibold">EUDR Mandatory</div>
+            <div class="font-mono-num text-base font-bold text-[#1D1510]">30 Dec 2026</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         INTERACTIVE EXCEL-STYLE 5-SHEET TAB BAR
+         ====================================================================== -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav aria-label="Workbook Sheets" class="flex flex-wrap items-stretch gap-1.5 pt-1">
+        <button type="button" class="sheet-tab active" data-sheet="sheet-1" onclick="switchSheet('sheet-1')">
+          <span class="sheet-tab-number inline-flex shrink-0 items-center justify-center w-5 h-5 rounded bg-[#B45309]/15 text-[#B45309] font-mono-num text-xs font-bold">1</span>
+          <span class="sheet-tab-copy">
+            <span class="sheet-tab-title">Supply Chain &amp; Processing</span>
+            <span class="sheet-tab-description">(From Farm to Cup)</span>
+          </span>
+        </button>
+
+        <button type="button" class="sheet-tab" data-sheet="sheet-2" onclick="switchSheet('sheet-2')">
+          <span class="sheet-tab-number inline-flex shrink-0 items-center justify-center w-5 h-5 rounded bg-[#1B5E3A]/15 text-[#1B5E3A] font-mono-num text-xs font-bold">2</span>
+          <span class="sheet-tab-copy">
+            <span class="sheet-tab-title">Farm &amp; Origin Data</span>
+            <span class="sheet-tab-description">(Brazil Producer Reality)</span>
+          </span>
+        </button>
+
+        <button type="button" class="sheet-tab" data-sheet="sheet-3" onclick="switchSheet('sheet-3')">
+          <span class="sheet-tab-number inline-flex shrink-0 items-center justify-center w-5 h-5 rounded bg-[#4E3E33]/15 text-[#4E3E33] font-mono-num text-xs font-bold">3</span>
+          <span class="sheet-tab-copy">
+            <span class="sheet-tab-title">Sellers, Roasters &amp; Labels</span>
+            <span class="sheet-tab-description">(Market &amp; Governance)</span>
+          </span>
+        </button>
+
+        <button type="button" class="sheet-tab" data-sheet="sheet-4" onclick="switchSheet('sheet-4')">
+          <span class="sheet-tab-number inline-flex shrink-0 items-center justify-center w-5 h-5 rounded bg-[#038141]/15 text-[#038141] font-mono-num text-xs font-bold">4</span>
+          <span class="sheet-tab-copy">
+            <span class="sheet-tab-title">Consumer Pack Scanner</span>
+            <span class="sheet-tab-description">(Shopper View)</span>
+          </span>
+        </button>
+
+        <button type="button" class="sheet-tab" data-sheet="sheet-5" onclick="switchSheet('sheet-5')">
+          <span class="sheet-tab-number inline-flex shrink-0 items-center justify-center w-5 h-5 rounded bg-[#EE8100]/20 text-[#B45309] font-mono-num text-xs font-bold">5</span>
+          <span class="sheet-tab-copy">
+            <span class="sheet-tab-title">Live Scorecard &amp; Sensitivity</span>
+            <span class="sheet-tab-description">(Excel Model Live)</span>
+          </span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       MAIN WORKSPACE CONTAINER
+       ======================================================================== -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7">
+
+    <!-- ======================================================================
+         SHEET 1: SUPPLY CHAIN & PROCESSING (FROM FARM TO CUP)
+         ====================================================================== -->
+    <section id="sheet-1" class="sheet-panel active space-y-8">
+      <!-- Intro Banner -->
+      <div class="paper-card p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#FFFDF9]">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-[#B45309]">Sheet 01 • Value Chain &amp; Information Loss</span>
+          <h2 class="text-xl sm:text-2xl font-bold text-[#1D1510] mt-0.5">How Coffee Is Processed — And Where Transparency Disappears</h2>
+          <p class="text-sm text-[#4E3E33] mt-1 max-w-3xl">
+            The core problem in coffee is not a total absence of data—it is that information is fragmented and lost across five stages between Brazilian farms and Belgian supermarkets. <strong>Click any stage below</strong> to inspect operational processes, hidden impacts, and transparency bottlenecks.
+          </p>
+        </div>
+        <div class="shrink-0 text-xs text-[#7A6A5D] bg-[#EFE9DD] px-3.5 py-2.5 rounded-xl border border-[#DFD5C5]">
+          <span class="font-semibold text-[#1D1510]">Interactive Tip:</span> Select a stage card to inspect its data breakdown.
+        </div>
+      </div>
+
+      <!-- 5-Stage Interactive Supply Chain Stepper -->
+      <div>
+        <div id="supply-chain-steps" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Stage Detail Inspector -->
+        <div id="stage-inspector" class="paper-card p-5 sm:p-7 mt-4 border-l-4 border-l-[#B45309]">
+          <!-- Populated dynamically when a stage is clicked -->
+        </div>
+      </div>
+
+      <!-- 4 Breaks in the Transparency Gap (Expert Brief & Mol 2015 / Gardner et al. 2019) -->
+      <div class="space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-[#B45309]">Academic &amp; Empirical Diagnosis</span>
+            <h3 class="text-xl sm:text-2xl font-bold text-[#1D1510]">The 4 Breaks in the Transparency Gap</h3>
+            <p class="text-sm text-[#4E3E33]">
+              Synthesized from Mol (2015), Gardner et al. (2019), Coffee Barometer 2026, and European Commission Green Claims studies. Click each break to inspect evidence and Group 3's response.
+            </p>
+          </div>
+        </div>
+
+        <div id="breaks-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Mol (2015) Theoretical Framework + 3 Critical Warnings -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left 2 cols: 4 Types of Transparency Matrix -->
+        <div class="lg:col-span-2 paper-card p-5 sm:p-6">
+          <span class="text-xs font-bold uppercase tracking-wider text-[#1B5E3A]">Theoretical Framework • Mol (2015)</span>
+          <h3 class="text-xl font-bold text-[#1D1510] mt-0.5">Four Types of Value-Chain Transparency</h3>
+          <p class="text-sm text-[#4E3E33] mt-1 mb-4">
+            Transparency is advancing rapidly between businesses and towards regulators, but lagging far behind for shoppers and the public—precisely where Group 3 intervenes.
+          </p>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-sm">
+              <thead>
+                <tr class="border-b-2 border-[#DFD5C5] text-xs uppercase tracking-wider text-[#7A6A5D]">
+                  <th class="py-2.5 pr-3">Type</th>
+                  <th class="py-2.5 px-3">Who Informs Whom</th>
+                  <th class="py-2.5 px-3">Coffee Example</th>
+                  <th class="py-2.5 pl-3">Status in 2026</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[#DFD5C5]">
+                <tr class="hover:bg-[#F7F3EC]">
+                  <td class="py-3 pr-3 font-semibold text-[#1D1510]">1. Management</td>
+                  <td class="py-3 px-3 text-[#4E3E33]">Upstream firms &rarr; Downstream firms</td>
+                  <td class="py-3 px-3 text-[#4E3E33]">Lot records between co-op, exporter &amp; importer</td>
+                  <td class="py-3 pl-3"><span class="px-2 py-0.5 rounded-full text-xs font-medium bg-[#E6F4EC] text-[#1B5E3A]">Growing (B2B platforms)</span></td>
+                </tr>
+                <tr class="hover:bg-[#F7F3EC]">
+                  <td class="py-3 pr-3 font-semibold text-[#1D1510]">2. Regulatory</td>
+                  <td class="py-3 px-3 text-[#4E3E33]">Firms &rarr; Public authorities</td>
+                  <td class="py-3 px-3 text-[#4E3E33]">EUDR geolocation due diligence statement</td>
+                  <td class="py-3 pl-3"><span class="px-2 py-0.5 rounded-full text-xs font-medium bg-[#FEF3C7] text-[#B45309]">Mandatory 30 Dec 2026</span></td>
+                </tr>
+                <tr class="bg-[#FFFBF2] hover:bg-[#FEF3C7]/40">
+                  <td class="py-3 pr-3 font-semibold text-[#B45309]">3. Consumer ★</td>
+                  <td class="py-3 px-3 text-[#4E3E33]">Firms &amp; certifiers &rarr; Shoppers</td>
+                  <td class="py-3 px-3 text-[#4E3E33]">Fairtrade, Rainforest Alliance &amp; Impact Rating</td>
+                  <td class="py-3 pl-3"><span class="px-2 py-0.5 rounded-full text-xs font-medium bg-[#FEE2E2] text-[#B91C1C]">Binary / Weak (Group 3 Focus)</span></td>
+                </tr>
+                <tr class="bg-[#FFFBF2] hover:bg-[#FEF3C7]/40">
+                  <td class="py-3 pr-3 font-semibold text-[#B45309]">4. Public ★</td>
+                  <td class="py-3 px-3 text-[#4E3E33]">Firms &rarr; Citizens, NGOs &amp; media</td>
+                  <td class="py-3 px-3 text-[#4E3E33]">Coffee Barometer, Repórter Brasil, Trase</td>
+                  <td class="py-3 pl-3"><span class="px-2 py-0.5 rounded-full text-xs font-medium bg-[#FEE2E2] text-[#B91C1C]">Large firms withhold data</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Right 1 col: Mol's 3 Warnings -->
+        <div class="paper-card p-5 sm:p-6 bg-[#EFE9DD]/60">
+          <span class="text-xs font-bold uppercase tracking-wider text-[#B45309]">Design Guardrails</span>
+          <h3 class="text-xl font-bold text-[#1D1510] mt-0.5">Mol's (2015) Three Warnings</h3>
+          <p class="text-xs text-[#4E3E33] mt-1 mb-4">More transparency is not automatically fairer. Our rating methodology explicitly prevents these three traps:</p>
+
+          <div class="space-y-3">
+            <div class="bg-[#FFFDF9] p-3.5 rounded-xl border border-[#DFD5C5]">
+              <div class="font-semibold text-sm text-[#1D1510]">1. Can Strengthen the Powerful</div>
+              <p class="text-xs text-[#4E3E33] mt-1">Expensive audits and data reporting are easier for large plantations than small Global South farmers. <strong>Our fix:</strong> Burden of proof sits on the roaster, and missing data receives a provisional 40 pts instead of 0.</p>
+            </div>
+
+            <div class="bg-[#FFFDF9] p-3.5 rounded-xl border border-[#DFD5C5]">
+              <div class="font-semibold text-sm text-[#1D1510]">2. Can Drown Shoppers ("Data Smog")</div>
+              <p class="text-xs text-[#4E3E33] mt-1">230 EU labels and raw metrics like "3.2 kg CO₂e/kg" overwhelm buyers. <strong>Our fix:</strong> One Nutri-Score-style A–E grade at a glance, with sub-scores behind a QR scan.</p>
+            </div>
+
+            <div class="bg-[#FFFDF9] p-3.5 rounded-xl border border-[#DFD5C5]">
+              <div class="font-semibold text-sm text-[#1D1510]">3. Requires "Checking the Checkers"</div>
+              <p class="text-xs text-[#4E3E33] mt-1">Self-declared brand schemes cannot be trusted equally to independent audits. <strong>Our fix:</strong> KPI 6 &amp; Confidence Mark weight verified third-party evidence at 2× self-declared claims.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SHEET 2: FARM & ORIGIN DATA (BRAZIL PRODUCER REALITY)
+         ====================================================================== -->
+    <section id="sheet-2" class="sheet-panel space-y-8">
+      <!-- Macro Brazil-to-Belgium Trade Corridor -->
+      <div class="paper-card p-5 sm:p-6">
+        <span class="text-xs font-bold uppercase tracking-wider text-[#1B5E3A]">Sheet 02 • Origin &amp; Trade Economics</span>
+        <h2 class="text-xl sm:text-2xl font-bold text-[#1D1510] mt-0.5">The Brazil &rarr; Port of Antwerp &rarr; Belgium Coffee Corridor</h2>
+        <p class="text-sm text-[#4E3E33] mt-1 max-w-3xl">
+          Brazil is the world's largest coffee supplier (alongside Vietnam, Colombia, and Indonesia accounting for ~2/3 of global supply, while the EU absorbs ~40% of global imports). Belgium acts as Europe's premier logistics and re-export hub.
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
+          <div class="bg-[#F7F3EC] border border-[#DFD5C5] rounded-xl p-4">
+            <div class="text-xs font-semibold text-[#7A6A5D] uppercase">2024 Belgian Green Imports</div>
+            <div class="font-mono-num text-2xl font-bold text-[#1D1510] mt-1">282,000 t</div>
+            <div class="text-xs text-[#4E3E33] mt-1">4th-largest green coffee importer in Europe (Source: CBI).</div>
+          </div>
+
+          <div class="bg-[#F7F3EC] border border-[#DFD5C5] rounded-xl p-4">
+            <div class="text-xs font-semibold text-[#7A6A5D] uppercase">2024 Belgian Re-Exports</div>
+            <div class="font-mono-num text-2xl font-bold text-[#1B5E3A] mt-1">184,000 t (66%)</div>
+            <div class="text-xs text-[#4E3E33] mt-1">#1 green coffee re-exporter in Europe (Source: CBI).</div>
+          </div>
+
+          <div class="bg-[#F7F3EC] border border-[#DFD5C5] rounded-xl p-4">
+            <div class="text-xs font-semibold text-[#7A6A5D] uppercase">Port of Antwerp Storage</div>
+            <div class="font-mono-num text-2xl font-bold text-[#B45309] mt-1">Up to 40%</div>
+            <div class="text-xs text-[#4E3E33] mt-1">Share of stored beans originating from Brazil (Source: Fevia / food.be).</div>
+          </div>
+
+          <div class="bg-[#F7F3EC] border border-[#DFD5C5] rounded-xl p-4">
+            <div class="text-xs font-semibold text-[#7A6A5D] uppercase">Global Supplier Concentration</div>
+            <div class="font-mono-num text-2xl font-bold text-[#1D1510] mt-1">~66% (4 Nations)</div>
+            <div class="text-xs text-[#4E3E33] mt-1">Brazil (#1), Vietnam, Colombia &amp; Indonesia supply two-thirds of world coffee (Trase).</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Value Distribution & Farmer Income Simulator -->
+      <div class="paper-card p-5 sm:p-6">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#DFD5C5] pb-4">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-[#B45309]">What Opacity Hides • Coffee Barometer 2026 &amp; BASIC</span>
+            <h3 class="text-xl sm:text-2xl font-bold text-[#1D1510] mt-0.5">Where Does the Retail Euro Actually Go?</h3>
+            <p class="text-sm text-[#4E3E33] mt-1">
+              Select a retail benchmark below to compare gross farmgate revenue, production costs, net farmer income, and downstream value capture.
+            </p>
+          </div>
+
+          <!-- Interactive Benchmark Switcher -->
+          <div class="flex flex-wrap gap-2" id="value-model-buttons">
+            <button type="button" onclick="renderValueBreakdown('german_kilo')" data-vmodel="german_kilo" aria-pressed="true" class="vmodel-btn px-3.5 py-2 rounded-xl text-xs font-semibold border transition cursor-pointer bg-[#1D1510] text-[#FFFDF9] border-[#1D1510]">
+              Standard Retail Kilo (€9.71/kg)
+            </button>
+            <button type="button" onclick="renderValueBreakdown('ground_vs_capsule')" data-vmodel="ground_vs_capsule" aria-pressed="false" class="vmodel-btn px-3.5 py-2 rounded-xl text-xs font-semibold border transition cursor-pointer bg-[#FFFDF9] text-[#1D1510] border-[#DFD5C5] hover:border-[#B45309]">
+              Ground (€8.06) vs. Capsules (€35.98)
+            </button>
+            <button type="button" onclick="renderValueBreakdown('caffenation')" data-vmodel="caffenation" aria-pressed="false" class="vmodel-btn px-3.5 py-2 rounded-xl text-xs font-semibold border transition cursor-pointer bg-[#FFFDF9] text-[#1D1510] border-[#DFD5C5] hover:border-[#B45309]">
+              Specialty Benchmark: Caffenation 2024
+            </button>
+          </div>
+        </div>
+
+        <!-- Dynamic Value Breakdown Output -->
+        <div id="value-breakdown-display" class="mt-5">
+          <!-- Populated dynamically by JS -->
+        </div>
+      </div>
+
+      <!-- Smallholder Data Burden & Brazilian Verification Infrastructure -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Left 5 Cols: Missing Data Fairness Rule -->
+        <div class="lg:col-span-5 paper-card p-5 sm:p-6 flex flex-col justify-between">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-[#B45309]">Fairness for Smallholders</span>
+            <h3 class="text-xl font-bold text-[#1D1510] mt-0.5">Why "Missing Data = 0" Would Fail Small Brazilian Farms</h3>
+            <p class="text-sm text-[#4E3E33] mt-2">
+              Small family producers in Brazil often lack the administrative staff or auditing budgets to generate formal ESG spreadsheets. If missing data automatically scored <strong>0</strong>, the rating would reward wealthy agribusinesses and punish smallholders.
+            </p>
+
+            <div class="mt-4 space-y-2.5">
+              <div class="p-3.5 rounded-xl bg-[#FEE2E2]/50 border border-[#FECACA]">
+                <div class="text-xs font-bold uppercase text-[#B91C1C]">Naive Rule (Rejected): Missing = 0 pts</div>
+                <p class="text-xs text-[#4E3E33] mt-1">Penalizes small Brazilian co-ops that cannot afford costly private audits, distorting the shelf score.</p>
+              </div>
+              <div class="p-3.5 rounded-xl bg-[#E6F4EC] border border-[#BBF7D0]">
+                <div class="text-xs font-bold uppercase text-[#1B5E3A]">Group 3 Rule (Adopted): Provisional 40 pts + Low Confidence</div>
+                <p class="text-xs text-[#4E3E33] mt-1">Missing KPIs receive a neutral provisional score of <strong>40/100</strong>, visibly flagged with a <strong>Low/Medium Confidence</strong> badge—placing the burden of proof on the European roaster.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-[#DFD5C5] text-xs text-[#7A6A5D]">
+            Note: Unpaid family labor accounts for up to <strong>~10% of the retail price</strong> in conventional smallholder coffee chains (Coffee Barometer 2026).
+          </div>
+        </div>
+
+        <!-- Right 7 Cols: Brazilian Public & Sector Data Sources -->
+        <div class="lg:col-span-7 paper-card p-5 sm:p-6">
+          <span class="text-xs font-bold uppercase tracking-wider text-[#1B5E3A]">Realistic Data Verification in Brazil</span>
+          <h3 class="text-xl font-bold text-[#1D1510] mt-0.5">Existing Brazilian Data Sources for Our KPIs</h3>
+          <p class="text-sm text-[#4E3E33] mt-1 mb-4">
+            Click each Brazilian data institution below to see how it supports verifiable scoring for Traceability, Environment, and Working Conditions.
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="brazil-sources-tabs">
+            <button type="button" onclick="selectBrazilSource('car')" data-bsource="car" aria-pressed="true" class="bsource-btn paper-card paper-card-interactive paper-card-active p-3.5 text-left">
+              <div class="font-mono-num text-xs font-bold text-[#1B5E3A]">KPI 2 &amp; KPI 3</div>
+              <div class="font-bold text-base text-[#1D1510] mt-0.5">CAR Registry</div>
+              <div class="text-xs text-[#7A6A5D]">Cadastro Ambiental Rural</div>
+            </button>
+
+            <button type="button" onclick="selectBrazilSource('cecafe')" data-bsource="cecafe" aria-pressed="false" class="bsource-btn paper-card paper-card-interactive p-3.5 text-left">
+              <div class="font-mono-num text-xs font-bold text-[#B45309]">KPI 1, 2 &amp; 5</div>
+              <div class="font-bold text-base text-[#1D1510] mt-0.5">Cecafé</div>
+              <div class="text-xs text-[#7A6A5D]">Brazilian Exporters Council</div>
+            </button>
+
+            <button type="button" onclick="selectBrazilSource('reporter')" data-bsource="reporter" aria-pressed="false" class="bsource-btn paper-card paper-card-interactive p-3.5 text-left">
+              <div class="font-mono-num text-xs font-bold text-[#E63E11]">KPI 4 &amp; KPI 6</div>
+              <div class="font-bold text-base text-[#1D1510] mt-0.5">Repórter Brasil</div>
+              <div class="text-xs text-[#7A6A5D]">Labor &amp; Supply Watchdog</div>
+            </button>
+          </div>
+
+          <div id="brazil-source-detail" class="mt-4 p-4 rounded-xl bg-[#F7F3EC] border border-[#DFD5C5]">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SHEET 3: SELLERS, ROASTERS & LABELS (MARKET & GOVERNANCE)
+         ====================================================================== -->
+    <section id="sheet-3" class="sheet-panel space-y-8">
+      <!-- Header Card -->
+      <div class="paper-card p-5 sm:p-6">
+        <span class="text-xs font-bold uppercase tracking-wider text-[#B45309]">Sheet 03 • Certification Paradox &amp; Brand Governance</span>
+        <h2 class="text-xl sm:text-2xl font-bold text-[#1D1510] mt-0.5">Why Existing Labels Fall Short — And How Brands Can Report Fairly</h2>
+        <p class="text-sm text-[#4E3E33] mt-1 max-w-3xl">
+          The EU has ~230 sustainability labels, yet half lack strong verification (European Commission). Meanwhile, large roasters are abandoning independent labels in favor of self-defined corporate schemes—which jumped from <strong>4.4% of sales in 2020 to 21% in 2023</strong> (CBI). Click any scheme below to compare what it actually covers.
+        </p>
+
+        <!-- Interactive Label Comparison Cards -->
+        <div id="labels-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-5">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Idea C: Standardized Impact Sheet for Independent Brands & Cooperatives -->
+      <div class="paper-card p-5 sm:p-6">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-[#DFD5C5]">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-[#1B5E3A]">Yvan's Solution C • Standardized Reporting Template</span>
+            <h3 class="text-xl sm:text-2xl font-bold text-[#1D1510] mt-0.5">Idea C: Standardized Brand &amp; Co-op Impact Sheet</h3>
+            <p class="text-sm text-[#4E3E33] mt-1 max-w-3xl">
+              Designed so medium-sized Belgian roasters and Brazilian cooperatives can submit standardized sustainability data without massive marketing budgets. Click any KPI row to inspect its <strong>Evidence Tiers (Level 2 vs. Level 1 vs. Level 0)</strong>.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 text-xs">
+            <span class="px-2.5 py-1 rounded-full font-semibold bg-[#E6F4EC] text-[#1B5E3A]">Level 2: 3rd-Party Verified</span>
+            <span class="px-2.5 py-1 rounded-full font-semibold bg-[#FEF3C7] text-[#B45309]">Level 1: Self-Declared</span>
+            <span class="px-2.5 py-1 rounded-full font-semibold bg-[#EFE9DD] text-[#57483D]">Level 0: Missing (40 pts)</span>
+          </div>
+        </div>
+
+        <div class="mt-4 overflow-x-auto">
+          <table class="w-full text-left border-collapse text-sm">
+            <thead>
+              <tr class="border-b-2 border-[#DFD5C5] text-xs uppercase tracking-wider text-[#7A6A5D]">
+                <th class="py-2.5 pr-3">KPI</th>
+                <th class="py-2.5 px-3">Weight</th>
+                <th class="py-2.5 px-3">Standardized Metric Submitted by Brand / Co-op</th>
+                <th class="py-2.5 px-3">Level 2 (Full Credit)</th>
+                <th class="py-2.5 pl-3">Level 1 (Half Verification Credit)</th>
+              </tr>
+            </thead>
+            <tbody id="idea-c-table-body" class="divide-y divide-[#DFD5C5]">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SHEET 4: CONSUMER PACK SCANNER (SHOPPER VIEW)
+         ====================================================================== -->
+    <section id="sheet-4" class="sheet-panel space-y-8">
+      <!-- Belgian Shopper Behavior Banner -->
+      <div class="paper-card p-5 sm:p-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          <div class="lg:col-span-6">
+            <span class="text-xs font-bold uppercase tracking-wider text-[#038141]">Sheet 04 • Belgian Retail &amp; Consumer Psychology (CBI)</span>
+            <h2 class="text-xl sm:text-2xl font-bold text-[#1D1510] mt-0.5">Designing for the 3-Second Supermarket Decision</h2>
+            <p class="text-sm text-[#4E3E33] mt-1.5">
+              Belgians consume an average of <strong>5.7 kg of roasted coffee per person per year</strong>, and <strong>65%</strong> recognize the Fairtrade logo—yet Fairtrade holds only <strong>4.4% market share</strong>. Why? Because at the shelf, shoppers prioritize taste, price, and habit before reading fine print.
+            </p>
+          </div>
+
+          <!-- Shopper Decision Priority Funnel -->
+          <div class="lg:col-span-6 bg-[#F7F3EC] border border-[#DFD5C5] rounded-xl p-4">
+            <div class="text-xs font-bold uppercase tracking-wider text-[#7A6A5D] mb-2.5">Belgian Shopper Shelf Decision Hierarchy (CBI)</div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div class="bg-[#1D1510] text-[#FFFDF9] p-3 rounded-lg">
+                <div class="font-mono-num text-xs text-[#FECB02] font-bold">PRIORITY #1</div>
+                <div class="font-bold text-sm mt-0.5">Taste</div>
+                <div class="text-[11px] text-[#DFD5C5] mt-0.5">Primary driver</div>
+              </div>
+              <div class="bg-[#3B2618] text-[#FFFDF9] p-3 rounded-lg">
+                <div class="font-mono-num text-xs text-[#FECB02] font-bold">PRIORITY #2</div>
+                <div class="font-bold text-sm mt-0.5">Price</div>
+                <div class="text-[11px] text-[#DFD5C5] mt-0.5">Promo sensitive</div>
+              </div>
+              <div class="bg-[#57483D] text-[#FFFDF9] p-3 rounded-lg">
+                <div class="font-mono-num text-xs text-[#FECB02] font-bold">PRIORITY #3</div>
+                <div class="font-bold text-sm mt-0.5">Habit</div>
+                <div class="text-[11px] text-[#DFD5C5] mt-0.5">Brand routine</div>
+              </div>
+              <div class="bg-[#FFFDF9] border border-[#B45309] text-[#1D1510] p-3 rounded-lg">
+                <div class="font-mono-num text-xs text-[#B45309] font-bold">PRIORITY #4</div>
+                <div class="font-bold text-sm mt-0.5">Impact / Label</div>
+                <div class="text-[11px] text-[#4E3E33] mt-0.5">Must work at a glance!</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Product Selector for the 3-Tier Consumer Journey -->
+      <div class="space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-[#B45309]">Yvan's Ideas A &amp; B • 3-Tier Progressive Disclosure</span>
+            <h3 class="text-xl sm:text-2xl font-bold text-[#1D1510]">Interactive Coffee Pack &amp; QR Journey Simulator</h3>
+            <p class="text-xs text-[#4E3E33]">Choose one of the three fictional test coffees below (scores stay synchronized with any edits you make in Sheet 5!).</p>
+          </div>
+
+          <div class="flex flex-wrap gap-2" id="consumer-coffee-selector">
+            <button type="button" onclick="selectConsumerCoffee('A')" data-ccoffee="A" aria-pressed="false" class="ccoffee-btn px-3.5 py-2 rounded-xl text-xs font-semibold border transition cursor-pointer bg-[#FFFDF9] text-[#1D1510] border-[#DFD5C5] hover:border-[#B45309]">
+              Coffee A: Supermarket Blend
+            </button>
+            <button type="button" onclick="selectConsumerCoffee('B')" data-ccoffee="B" aria-pressed="false" class="ccoffee-btn px-3.5 py-2 rounded-xl text-xs font-semibold border transition cursor-pointer bg-[#FFFDF9] text-[#1D1510] border-[#DFD5C5] hover:border-[#B45309]">
+              Coffee B: Certified-Label
+            </button>
+            <button type="button" onclick="selectConsumerCoffee('C')" data-ccoffee="C" aria-pressed="true" class="ccoffee-btn px-3.5 py-2 rounded-xl text-xs font-semibold border transition cursor-pointer bg-[#1D1510] text-[#FFFDF9] border-[#1D1510]">
+              Coffee C: Brazilian Co-op
+            </button>
+          </div>
+        </div>
+
+        <!-- 3-Tier Consumer Experience Grid -->
+        <div id="consumer-three-tiers" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Populated dynamically by JS using live model calculations -->
+        </div>
+      </div>
+
+      <!-- Carbon Per Cup vs. Carbon Per Kg Explainer -->
+      <div class="paper-card p-5 sm:p-6 bg-[#EFE9DD]/60">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="max-w-2xl">
+            <span class="text-xs font-bold uppercase tracking-wider text-[#1B5E3A]">KPI 5 Design Insight • Making Carbon Comprehensible</span>
+            <h3 class="text-lg sm:text-xl font-bold text-[#1D1510] mt-0.5">Why We Measure "kg CO₂e per Cup" Instead of "3.2 kg CO₂e per kg"</h3>
+            <p class="text-sm text-[#4E3E33] mt-1">
+              Shoppers struggle to interpret raw agricultural footprint numbers like <em>"3.2 kg CO₂-equivalent per kilogram"</em>—and per-kg figures hide the massive packaging and brewing energy gap between filter coffee and single-serve aluminium/plastic capsules. Measuring <strong>per cup</strong> lets consumers compare brewing systems directly.
+            </p>
+          </div>
+          <div class="grid grid-cols-2 gap-3 shrink-0">
+            <div class="bg-[#FFFDF9] border border-[#DFD5C5] rounded-xl p-3.5 text-center">
+              <div class="text-xs font-semibold text-[#7A6A5D]">Filter / Ground Brew</div>
+              <div class="font-mono-num text-lg font-bold text-[#1B5E3A] mt-0.5">~24% to farmer</div>
+              <div class="text-[11px] text-[#4E3E33]">Lower packaging footprint per cup</div>
+            </div>
+            <div class="bg-[#FFFDF9] border border-[#DFD5C5] rounded-xl p-3.5 text-center">
+              <div class="text-xs font-semibold text-[#7A6A5D]">Single-Serve Capsule</div>
+              <div class="font-mono-num text-lg font-bold text-[#E63E11] mt-0.5">~6% to farmer</div>
+              <div class="text-[11px] text-[#4E3E33]">High aluminium/plastic &amp; waste cost</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SHEET 5: LIVE SCORECARD & SENSITIVITY LAB (EXCEL MODEL LIVE)
+         ====================================================================== -->
+    <section id="sheet-5" class="sheet-panel space-y-8">
+      <!-- Fictional Test Case Disclaimer Banner -->
+      <div class="paper-card p-4 sm:p-5 bg-[#FEF3C7]/65 border-[#F59E0B] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-start gap-3">
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#B45309] text-white font-bold text-sm shrink-0 mt-0.5">i</span>
+          <div>
+            <div class="text-xs font-bold uppercase tracking-wider text-[#92400E]">Interactive Replica of Coffee_Impact_Rating_Scorecard.xlsx</div>
+            <p class="text-sm text-[#1D1510] mt-0.5">
+              <strong>Fictional Test Coffees:</strong> Coffee A, Coffee B, and Coffee C are illustrative test profiles created by Group 3 to validate the scoring formulas, provisional missing-data safeguards, and weight sensitivity. Edit any weight, score, or evidence level below to watch the entire workbook recalculate live.
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button type="button" onclick="resetExcelModel()" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#1D1510] text-[#FFFDF9] hover:bg-[#3B2618] transition cursor-pointer">
+            Reset Excel Defaults
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 1: METHOD PARAMETERS (Editable Weights, Provisional Score & Thresholds) -->
+      <div class="paper-card p-5 sm:p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#DFD5C5]">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-[#B45309]">Workbook Tab 1: Method</span>
+            <h2 class="text-xl font-bold text-[#1D1510]">KPI Weights, Provisional Score &amp; Grade Thresholds</h2>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <span id="weight-sum-badge" class="font-mono-num text-xs font-bold px-3 py-1.5 rounded-full bg-[#E6F4EC] text-[#1B5E3A] border border-[#BBF7D0]">
+              Total Weight: 100.0% (OK)
+            </span>
+            <button type="button" onclick="normalizeWeights()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#EFE9DD] hover:bg-[#E6DEC8] text-[#1D1510] border border-[#DFD5C5] cursor-pointer">
+              Normalize to 100%
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-5">
+          <!-- KPI Weights Grid (7 cols) -->
+          <div class="lg:col-span-7 space-y-2.5">
+            <div class="text-xs font-bold uppercase tracking-wider text-[#7A6A5D]">6 KPI Weights (%)</div>
+            <div id="method-weights-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Rules & Thresholds (5 cols) -->
+          <div class="lg:col-span-5 bg-[#F7F3EC] border border-[#DFD5C5] rounded-xl p-4 space-y-3">
+            <div class="text-xs font-bold uppercase tracking-wider text-[#7A6A5D]">Scoring &amp; Confidence Rules</div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label for="param-provisional" class="block text-xs font-semibold text-[#1D1510] mb-1">Provisional Score (Missing)</label>
+                <input id="param-provisional" type="number" min="0" max="100" step="1" value="40" onchange="recalculateAll()" class="excel-input w-full" />
+              </div>
+              <div>
+                <label for="param-conf-high" class="block text-xs font-semibold text-[#1D1510] mb-1">High Confidence (&ge; %)</label>
+                <input id="param-conf-high" type="number" min="0" max="100" step="1" value="70" onchange="recalculateAll()" class="excel-input w-full" />
+              </div>
+              <div>
+                <label for="param-conf-med" class="block text-xs font-semibold text-[#1D1510] mb-1">Medium Confidence (&ge; %)</label>
+                <input id="param-conf-med" type="number" min="0" max="100" step="1" value="40" onchange="recalculateAll()" class="excel-input w-full" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-[#1D1510] mb-1">Grade Scale Bands</label>
+                <div class="text-[11px] font-mono-num text-[#4E3E33] bg-[#FFFDF9] border border-[#DFD5C5] rounded-lg px-2.5 py-1.5">
+                  A&ge;80 | B&ge;65 | C&ge;50 | D&ge;35 | E&lt;35
+                </div>
+              </div>
+            </div>
+
+            <p class="text-[11px] text-[#57483D] leading-relaxed">
+              <strong>KPI 6 &amp; Confidence Formula:</strong> Auto-computed as <code class="font-mono-num bg-[#FFFDF9] px-1 rounded">SUMPRODUCT(w₁..₅, ev₁..₅) / (2 × SUM(w₁..₅)) × 100</code>. Self-declared data (Ev=1) earns 50% verification credit; third-party verified (Ev=2) earns 100%.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: INTERACTIVE INPUTS & LIVE SCORECARD TABLE -->
+      <div class="paper-card p-5 sm:p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-[#DFD5C5]">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-[#1B5E3A]">Workbook Tabs 2 &amp; 3: Inputs &amp; Scorecard</span>
+            <h2 class="text-xl font-bold text-[#1D1510]">Live Coffee Scorecard &amp; Evidence Editor</h2>
+            <p class="text-xs text-[#4E3E33] mt-0.5">
+              Leave a raw score blank or set Evidence to <strong>0 (Missing)</strong> to trigger the provisional score rule.
+            </p>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto mt-4">
+          <table class="w-full text-left border-collapse text-sm min-w-[780px]">
+            <thead>
+              <tr class="border-b-2 border-[#DFD5C5] bg-[#F7F3EC] text-xs uppercase tracking-wider text-[#57483D]">
+                <th class="py-3 px-3 rounded-tl-lg">Indicator / Output Metric</th>
+                <th class="py-3 px-3 text-center">Weight</th>
+                <th class="py-3 px-3">Coffee A: Supermarket Blend</th>
+                <th class="py-3 px-3">Coffee B: Certified-Label</th>
+                <th class="py-3 px-3 rounded-tr-lg">Coffee C: Brazilian Co-op</th>
+              </tr>
+            </thead>
+            <tbody id="scorecard-table-body" class="divide-y divide-[#DFD5C5]">
+              <!-- Populated dynamically by JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Visual Comparison Chart (SVG Bar & KPI Breakdown) -->
+        <div class="mt-6 pt-5 border-t border-[#DFD5C5]">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+            <h3 class="text-base font-bold text-[#1D1510]">Visual KPI &amp; Total Score Comparison (Live)</h3>
+            <div class="flex items-center gap-4 text-xs">
+              <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-[#EE8100]"></span> Coffee A (Supermarket)</span>
+              <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-[#FECB02]"></span> Coffee B (Certified)</span>
+              <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-[#85BB2F]"></span> Coffee C (Brazilian Co-op)</span>
+            </div>
+          </div>
+          <div id="live-comparison-chart" class="bg-[#F7F3EC] border border-[#DFD5C5] rounded-xl p-4">
+            <!-- Populated dynamically by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: LIVE SENSITIVITY ANALYSIS TABLE -->
+      <div class="paper-card p-5 sm:p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-[#DFD5C5]">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-[#B45309]">Workbook Tab 4: Sensitivity</span>
+            <h2 class="text-xl font-bold text-[#1D1510]">Weight Sensitivity &amp; Ranking Robustness Test</h2>
+            <p class="text-xs text-[#4E3E33] mt-0.5">
+              Tests whether the coffee ranking stays stable when stakeholder priorities shift (e.g., farmer-income heavy vs. environment-heavy vs. verification-heavy).
+            </p>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto mt-4">
+          <table class="w-full text-left border-collapse text-sm min-w-[820px]">
+            <thead>
+              <tr class="border-b-2 border-[#DFD5C5] bg-[#F7F3EC] text-xs uppercase tracking-wider text-[#57483D]">
+                <th class="py-3 px-3">Scenario</th>
+                <th class="py-3 px-3">Weights (K1–K6 %)</th>
+                <th class="py-3 px-3 text-right">Coffee A Score</th>
+                <th class="py-3 px-3 text-right">Coffee B Score</th>
+                <th class="py-3 px-3 text-right">Coffee C Score</th>
+                <th class="py-3 px-3 text-center">Rank Order</th>
+                <th class="py-3 px-3 text-center">Matches Base?</th>
+              </tr>
+            </thead>
+            <tbody id="sensitivity-table-body" class="divide-y divide-[#DFD5C5]">
+              <!-- Populated dynamically by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================
+       EDITORIAL FOOTER
+       ======================================================================== -->
+  <footer class="border-t border-[#DFD5C5] bg-[#EFE9DD]/70 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-[#57483D]">
+      <div>
+        <strong class="text-[#1D1510]">Group 3 — CoffeeLab (Transparency, Traceability &amp; Coffee Impact Rating)</strong>
+        <p class="mt-0.5">
+          Team: Gui Nunes, Gui Moreno, Bryan, Marco Antonio, Martin, Maxim, Myriam, Sabrina &amp; Yvan • COIL Collaboration (ESEG São Paulo &amp; HEPH-Condorcet).
+        </p>
+      </div>
+      <div class="text-left sm:text-right">
+        <div>Key Sources: Mol (2015); Gardner et al. (2019); Coffee Barometer 2026; CBI; Fevia; Trase; European Commission Green Claims; Caffenation 2024.</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========================================================================
+       JAVASCRIPT: DATA REPOSITORY, EXCEL ENGINE & INTERACTIVE RENDERERS
+       ======================================================================== -->
+  <script>
+    /* ========================================================================
+       1. STRUCTURED RESEARCH DATA (FROM GROUP 3 DOCUMENTS & EXPERT BRIEF)
+       ======================================================================== */
+    const SUPPLY_CHAIN_STAGES = [
+      {
+        id: 'farm',
+        step: '01',
+        title: 'Farm & Harvest',
+        location: 'Brazil (e.g., Minas Gerais)',
+        shortTag: 'Environmental, Social & Price Risk',
+        summary: 'Coffee cherries are cultivated and harvested on Brazilian farms ranging from small family plots to large estates. High environmental and social stakes occur here, yet smallholders lack resources to document compliance.',
+        bottleneck: 'Smallholder producers rarely have digital plot polygons or auditing budgets; farmgate costs and unpaid family labor are invisible downstream.',
+        impacts: [
+          { category: 'Environmental', text: 'Deforestation pressure, biodiversity loss, soil degradation, high water consumption, and synthetic pesticide runoff.' },
+          { category: 'Social', text: 'Low farmworker wages, occupational safety hazards, labor rights gaps, and unpaid family labor representing up to ~10% of retail price.' },
+          { category: 'Economic', text: 'Volatile global C-market prices, rising fertilizer/input costs, limited access to financing, and razor-thin net margins (€0.41/kg net on a €9.71 retail kilo).' }
+        ],
+        kpisLinked: ['KPI 1: Farmer Share of Price', 'KPI 3: Farm Environment', 'KPI 4: Working Conditions']
+      },
+      {
+        id: 'processing',
+        step: '02',
+        title: 'Processing & Milling',
+        location: 'Wet / Dry Mills & Cooperatives',
+        shortTag: 'Critical Batch-Mixing Bottleneck',
+        summary: 'Harvested cherries undergo wet (washed) or dry (natural) processing, hulling, sorting, and grading into green coffee beans.',
+        bottleneck: 'PHYSICAL TRACEABILITY BREAK: Cherries and beans from dozens of different farms are pooled and processed in the same bulk batch—erasing plot-level origin unless segregated.',
+        impacts: [
+          { category: 'Traceability Loss', text: 'Once lots are blended at the mill, linking a retail bag back to specific deforestation-free farm plots becomes nearly impossible.' },
+          { category: 'Environmental', text: 'Wet milling consumes large volumes of fresh water and generates organic wastewater that pollutes local rivers if untreated.' },
+          { category: 'Governance', text: 'Cooperatives can aggregate smallholder data (e.g., CAR registries), but need standardized templates like Idea C.' }
+        ],
+        kpisLinked: ['KPI 2: Traceability Depth', 'KPI 3: Farm Environment']
+      },
+      {
+        id: 'trading',
+        step: '03',
+        title: 'Trading & Export',
+        location: 'Santos & Port of Antwerp Hub',
+        shortTag: 'Market Concentration & FOB Illusion',
+        summary: 'Green coffee is exported from Brazil to Europe. Belgium imported 282,000 tonnes in 2024 (#4 in EU) and re-exported 184,000 tonnes (66%, #1 in EU); up to 40% of beans stored in Antwerp are Brazilian.',
+        bottleneck: 'PRICE DISCLOSURE BREAK: Top 5 traders control ~50% of global exports (up from ~30% in 2018; top 10 = 35%, top 30 = 55%). Many are privately held with zero public disclosure duty.',
+        impacts: [
+          { category: 'FOB Price Illusion', text: 'Even when brands publish FOB (Free On Board) export prices, FOB reflects port-of-export value—not what the farmer actually received after co-op, transport, and milling deductions.' },
+          { category: 'Secret Contracts', text: '0 of the 15 largest roasters and traders in the 2026 Coffee Barometer disclose prices paid, contract length, or living-income premiums.' },
+          { category: 'EUDR Deadline', text: 'From 30 December 2026, EU Deforestation Regulation mandates geolocation due diligence statements for every imported lot.' }
+        ],
+        kpisLinked: ['KPI 1: Farmer Share of Price', 'KPI 2: Traceability Depth', 'KPI 6: Verification Level']
+      },
+      {
+        id: 'roasting',
+        step: '04',
+        title: 'Roasting & Packaging',
+        location: 'Belgium & European Roasteries',
+        shortTag: 'Format & Packaging Footprint',
+        summary: 'Roasters blend origins, roast green beans, and package coffee into ground bags, whole beans, or single-serve aluminium/plastic capsules.',
+        bottleneck: 'VERIFICATION BREAK: Roasters select suppliers, energy sources, and packaging formats, while increasingly replacing third-party certifications with self-regulated corporate programmes (up from 4.4% in 2020 to 21% in 2023).',
+        impacts: [
+          { category: 'Capsule vs. Filter Gap', text: 'Ground coffee (€8.06/kg) returns ~24% to the farmer, whereas single-serve capsules (€35.98/kg) return only ~6% to the farmer while multiplying packaging waste.' },
+          { category: 'Energy & Waste', text: 'Roasting gas/electricity intensity and non-recyclable multi-layer pouches or capsules heavily shape per-cup climate impact.' },
+          { category: 'Burden of Proof', text: 'Under Group 3’s rating rules, the roaster placing the pack on the Belgian shelf carries the burden of proof for missing data.' }
+        ],
+        kpisLinked: ['KPI 5: Carbon per Cup', 'KPI 6: Verification Level']
+      },
+      {
+        id: 'retail',
+        step: '05',
+        title: 'Retail & Consumption',
+        location: 'Belgian Supermarkets & Homes',
+        shortTag: 'Data Smog & Country-Only Labels',
+        summary: 'Belgian shoppers consume 5.7 kg of roasted coffee per capita annually, making split-second choices driven by taste, price, and habit.',
+        bottleneck: 'UNDERSTANDING BREAK: Complex supply chain reality collapses into a country name ("100% Brazil") or vague marketing claims among ~230 EU sustainability labels.',
+        impacts: [
+          { category: 'Misleading Green Claims', text: 'European Commission found 53% of environmental claims vague, misleading, or unfounded, and 40% lacking supporting evidence.' },
+          { category: 'QR Code Fatigue', text: 'INRAE research shows standalone QR codes are scanned mainly at first purchase and frequently redirect to generic brand storytelling rather than verified metrics.' },
+          { category: 'Nutri-Score Clarity', text: 'A single A–E grade with a Confidence Mark solves shelf overload in 3 seconds, backed by a 6-KPI QR breakdown.' }
+        ],
+        kpisLinked: ['All 6 KPIs -> Unified A–E Grade + Confidence Mark']
+      }
+    ];
+
+    const TRANSPARENCY_BREAKS = [
+      {
+        num: 'Break 01',
+        title: 'Disclosure Break',
+        subtitle: 'Prices paid, contract length & risk sharing are hidden',
+        stat: '0 / 15 Top Firms',
+        statDetail: 'None of the 15 largest roasters & traders in Coffee Barometer 2026 publish prices paid or living-income premiums.',
+        solution: 'KPI 1 (Farmer Share of Price, 25% weight) benchmarks actual farmer share against living-income thresholds, exposing the gap between €8.06/kg ground (~24% share) and €35.98/kg capsules (~6% share).'
+      },
+      {
+        num: 'Break 02',
+        title: 'Physical Traceability Break',
+        subtitle: 'Batch mixing & trader concentration sever plot-to-pack links',
+        stat: '~50% Top 5 Traders',
+        statDetail: 'Top 5 traders rose from ~30% (2018) to ~50% (2025); top 10 control 35%, top 30 control 55%—mostly privately held without disclosure duties.',
+        solution: 'KPI 2 (Traceability Depth, 20% weight) scores progressive granularity from country -> region -> cooperative -> geolocated farm plot (aligned with EUDR mandatory from 30 Dec 2026).'
+      },
+      {
+        num: 'Break 03',
+        title: 'Verification Break',
+        subtitle: 'Self-declared brand schemes erode independent audits',
+        stat: '50% Weak / Unverified',
+        statDetail: 'EU Commission finds half of labels have weak or no verification; corporate in-house schemes jumped from 4.4% (2020) to 21% (2023).',
+        solution: 'KPI 6 (Verification Level, 10% weight) & Confidence Mark give self-declared claims only 50% credit (Ev=1) vs. 100% for independent 3rd-party audits (Ev=2).'
+      },
+      {
+        num: 'Break 04',
+        title: 'Understanding Break',
+        subtitle: '"Data smog" & technical metrics paralyze shoppers',
+        stat: '53% Vague Claims',
+        statDetail: 'EU has ~230 sustainability labels; 53% of green claims are vague/misleading, 40% lack evidence, and raw numbers like "3.2 kg CO₂e/kg" confuse buyers.',
+        solution: 'Three-tier architecture: (1) At-a-glance Nutri-Score A–E grade + Confidence badge on pack; (2) 6-KPI sub-scores via QR; (3) Farm-to-cup map & per-cup carbon.'
+      }
+    ];
+
+    const BRAZIL_SOURCES = {
+      car: {
+        title: 'CAR — Cadastro Ambiental Rural (Rural Environmental Registry)',
+        badge: 'Geolocation & Deforestation Compliance',
+        description: 'Brazil’s mandatory public electronic environmental registry mapping georeferenced farm boundaries, Legal Reserves, and Permanent Preservation Areas (APPs).',
+        roleInRating: 'Provides realistic plot-level polygon verification for Brazilian coffee farms without forcing smallholders to pay for duplicate satellite mapping—directly supporting KPI 2 (Traceability) and KPI 3 (Deforestation-free Environment) ahead of the 30 Dec 2026 EUDR deadline.'
+      },
+      cecafe: {
+        title: 'Cecafé — Conselho dos Exportadores de Café do Brasil',
+        badge: 'Export Flows & Social-Sustainability Programs',
+        description: 'Represents Brazilian coffee exporters, publishing granular monthly shipment volumes, origin port statistics, and sustainability/social well-being programs across producing regions.',
+        roleInRating: 'Enables macro and regional cross-checking of export volumes, FOB benchmarks, and cooperative sustainability initiatives for KPI 1 (Pricing context), KPI 2 (Regional origin), and KPI 5 (Logistics carbon).'
+      },
+      reporter: {
+        title: 'Repórter Brasil — Independent Investigative Watchdog',
+        badge: 'Labor Rights & Second-Order Verification',
+        description: 'Renowned Brazilian investigative journalism and human-rights NGO monitoring supply chains, labor conditions, and Brazil’s official "Dirty List" (Lista Suja) of forced/degrading labor.',
+        roleInRating: 'Operationalizes Mol’s (2015) "checking the checkers" principle: serves as an independent public verification source for KPI 4 (Working Conditions) and flags red-flag labor violations even on certified estates.'
+      }
+    };
+
+    const LABEL_COMPARISONS = [
+      {
+        name: 'Fairtrade',
+        share: '4.4% BE Market Share (65% Recognition)',
+        focus: 'Social & Price Floor',
+        strength: 'Guarantees a minimum price floor and Fairtrade Premium for democratic cooperatives.',
+        blindSpot: 'Binary pass/fail label; does not measure per-cup carbon footprint, packaging waste, or full farm biodiversity.',
+        tagColor: 'bg-[#E6F4EC] text-[#1B5E3A]'
+      },
+      {
+        name: 'EU Organic',
+        share: 'Regulated EU Standard',
+        focus: 'Chemical & Soil Inputs',
+        strength: 'Prohibits synthetic pesticides and chemical fertilizers, protecting soil and water ecosystems.',
+        blindSpot: 'Contains no minimum price or living-income rule—an organic coffee can still severely underpay farmers.',
+        tagColor: 'bg-[#E6F4EC] text-[#1B5E3A]'
+      },
+      {
+        name: 'Rainforest Alliance',
+        share: 'Major Retail Presence',
+        focus: 'Biodiversity & Farm Management',
+        strength: 'Promotes shade-grown agroforestry, forest protection, and farm management training.',
+        blindSpot: 'Allows mass-balance mixing in some supply chains and lacks transparent price-share disclosure to consumers.',
+        tagColor: 'bg-[#FEF3C7] text-[#B45309]'
+      },
+      {
+        name: 'Corporate In-House Schemes',
+        share: 'Surged 4.4% (2020) -> 21% (2023)',
+        focus: 'Brand-Controlled Standards',
+        strength: 'Allows large roasters to tailor sourcing guidelines across huge conventional volumes.',
+        blindSpot: 'Self-defined criteria with weak or non-independent verification; erodes consumer trust (EC Green Claims warning).',
+        tagColor: 'bg-[#FEE2E2] text-[#B91C1C]'
+      },
+      {
+        name: 'Standalone Marketing QR Codes',
+        share: 'Growing on Specialty & Retail Packs',
+        focus: 'Brand Storytelling',
+        strength: 'Engages curious shoppers at first purchase with origin photos and tasting notes.',
+        blindSpot: 'INRAE shows shoppers rarely scan twice; most link to unverified marketing pages rather than standardized KPIs.',
+        tagColor: 'bg-[#EFE9DD] text-[#4E3E33]'
+      },
+      {
+        name: 'Group 3 Coffee Impact Rating',
+        share: 'Proposed Universal A–E Standard',
+        focus: 'Holistic 6-KPI + Confidence Score',
+        strength: 'Combines farmer income, traceability, environment, labor, per-cup carbon & 3rd-party verification into one A–E grade + Confidence mark.',
+        blindSpot: 'Requires governance consensus on KPI weights and roaster adoption—tested live in Sheet 5.',
+        tagColor: 'bg-[#1D1510] text-[#FFFDF9]'
+      }
+    ];
+
+    /* ========================================================================
+       2. EXCEL WORKBOOK MODEL STATE & EXACT FORMULAS (SHEET 5 & SHEET 4 SYNC)
+       ======================================================================== */
+    const DEFAULT_MODEL = {
+      weights: [25, 20, 20, 15, 10, 10], // KPI 1..6 percentages
+      provisionalScore: 40,
+      confHigh: 70,
+      confMed: 40,
+      gradeCutoffs: { A: 80, B: 65, C: 50, D: 35 },
+      kpis: [
+        {
+          id: 1,
+          name: 'Farmer share of price',
+          question: 'How much of what I pay reaches the farmer?',
+          measure: 'Share of retail price paid to farmer vs. living-income benchmark',
+          level2Req: 'Audited farmgate receipts & contract price split verified by 3rd party',
+          level1Req: 'Roaster-published FOB / farmgate price table without external audit'
+        },
+        {
+          id: 2,
+          name: 'Traceability depth',
+          question: 'Do we know where this coffee comes from?',
+          questionShort: 'Origin depth (country -> region -> co-op -> plot)',
+          measure: 'Country (15) -> Region (45) -> Cooperative (75) -> Farm Plot GPS (90+)',
+          level2Req: 'Geolocated farm polygons (CAR/EUDR) & segregated lot IDs verified',
+          level1Req: 'Declared region or cooperative name without lot-level audit'
+        },
+        {
+          id: 3,
+          name: 'Farm environment',
+          question: 'Was it grown without harming nature?',
+          measure: 'Deforestation-free status, pesticide limits, water & biodiversity practices',
+          level2Req: 'Satellite deforestation check + independent environmental audit',
+          level1Req: 'Brand sustainability checklist or unverified supplier questionnaire'
+        },
+        {
+          id: 4,
+          name: 'Working conditions',
+          question: 'Are the workers treated fairly?',
+          measure: 'Living wages, occupational safety, labor rights, child/forced labor checks',
+          level2Req: 'Independent social audit + Repórter Brasil / labor registry screening',
+          level1Req: 'Supplier code of conduct signed without on-site inspection'
+        },
+        {
+          id: 5,
+          name: 'Carbon per cup',
+          question: 'What is the climate cost of one cup?',
+          measure: 'kg CO₂e per brewed cup (accounting for farming, transport & capsule vs. filter)',
+          level2Req: 'ISO-compliant lifecycle assessment (LCA) per cup verified by 3rd party',
+          level1Req: 'Estimated footprint using secondary industry emission factors'
+        },
+        {
+          id: 6,
+          name: 'Verification level',
+          question: 'Who checked these claims?',
+          measure: 'Auto-calculated weighted evidence score across KPIs 1–5 (Ev=2 full, Ev=1 half, Ev=0 none)',
+          level2Req: 'Independent accredited third-party certification / audit',
+          level1Req: 'Internal company verification or self-declared impact sheet'
+        }
+      ],
+      coffees: {
+        A: {
+          code: 'A',
+          name: 'Coffee A: Supermarket blend (fictional)',
+          shortName: 'Supermarket Blend',
+          packSubtitle: 'Conventional Ground Blend • 500g',
+          retailPrice: '€8.06 / kg',
+          farmerShareEst: '~18–24% (Unverified)',
+          carbonPerCup: '58g CO₂e / cup (Est.)',
+          originRoute: ['Brazil & Vietnam (Mixed Bulk)', 'Bulk Regional Mill (Blended)', 'Port of Antwerp Bulk Silo', 'Industrial Roaster (BE)', 'Supermarket Shelf'],
+          scores: [null, 15, 40, 45, 50], // KPI 1..5 raw scores (null = missing)
+          evidence: [0, 1, 1, 1, 1]       // 0 = Missing, 1 = Self-declared, 2 = 3rd-party verified
+        },
+        B: {
+          code: 'B',
+          name: 'Coffee B: Certified-label coffee (fictional)',
+          shortName: 'Certified-Label Coffee',
+          packSubtitle: 'Rainforest / Fairtrade Label • 250g',
+          retailPrice: '€14.80 / kg',
+          farmerShareEst: '~26% (Label Floor)',
+          carbonPerCup: '52g CO₂e / cup (Est.)',
+          originRoute: ['Sul de Minas, Brazil (Co-op)', 'Certified Co-op Wet Mill', 'Santos -> Port of Antwerp', 'Belgian Certified Roaster', 'Supermarket Bio/Fair Aisle'],
+          scores: [55, 45, 70, 70, 45],
+          evidence: [1, 2, 2, 2, 1]
+        },
+        C: {
+          code: 'C',
+          name: 'Coffee C: Brazilian co-op single origin (fictional)',
+          shortName: 'Brazilian Co-op Single Origin',
+          packSubtitle: 'Direct-Trade Single Co-op Lot • 250g',
+          retailPrice: '€19.50 / kg',
+          farmerShareEst: '~38% (Audited Direct)',
+          carbonPerCup: '46g CO₂e / cup (Provisional)',
+          originRoute: ['Carmo de Minas Plot #14 (CAR)', 'Segregated Micro-Lot Mill', 'Santos -> Antwerp Direct Lot', 'Independent Belgian Roaster', 'Specialty & Retail Shelf'],
+          scores: [85, 90, 75, 65, null],
+          evidence: [2, 2, 1, 1, 0]
+        }
+      }
+    };
+
+    const SENSITIVITY_SCENARIOS = [
+      { id: 'base', name: 'Base weights (Group 3 Default)', weights: [25, 20, 20, 15, 10, 10] },
+      { id: 'equal', name: 'Equal weights (16.7% each)', weights: [100/6, 100/6, 100/6, 100/6, 100/6, 100/6] },
+      { id: 'farmer', name: 'Farmer income heavy', weights: [40, 15, 15, 10, 10, 10] },
+      { id: 'env', name: 'Environment & carbon heavy', weights: [15, 15, 25, 10, 25, 10] },
+      { id: 'verif', name: 'Verification heavy', weights: [15, 15, 15, 15, 10, 30] }
+    ];
+
+    // Deep-cloned mutable state
+    let appState = JSON.parse(JSON.stringify(DEFAULT_MODEL));
+    let activeStageId = 'farm';
+    let stageTransitionToken = 0;
+    let stageExitAnimation = null;
+    let stageHeightAnimation = null;
+    const selectionToneAnimations = new WeakMap();
+    let renderedConsumerCoffee = null;
+    let consumerPackTransitionToken = 0;
+    let consumerPackExitAnimation = null;
+    let consumerPackEnterAnimation = null;
+    let consumerPackHeightAnimation = null;
+    let activeValueBreakdownMode = null;
+    let valueBreakdownTransitionToken = 0;
+    let valueBreakdownExitAnimation = null;
+    let valueBreakdownEnterAnimation = null;
+    let valueBreakdownHeightAnimation = null;
+    let methodWeightsHasRendered = false;
+    let scorecardHasRendered = false;
+    let sheetPanelExitAnimation = null;
+    let sheetPanelEnterAnimation = null;
+    let sheetPanelTransitionToken = 0;
+    let activeBrazilSourceId = null;
+    let brazilSourceTransitionToken = 0;
+    let brazilSourceExitAnimation = null;
+    let brazilSourceEnterAnimation = null;
+    let brazilSourceHeightAnimation = null;
+    let selectedConsumerCoffee = 'C';
+
+    /* ========================================================================
+       3. CORE SCORING ENGINE (EXACT REPLICA OF EXCEL FORMULAS)
+       ======================================================================== */
+    function evaluateCoffee(coffee, weights, provScore, confHigh, confMed, cutoffs) {
+      const w1to5 = weights.slice(0, 5);
+      const sumW1to5 = w1to5.reduce((acc, v) => acc + v, 0);
+      const totalWeight = weights.reduce((acc, v) => acc + v, 0);
+
+      let missingCount = 0;
+      const effectiveScores1to5 = [];
+      let weightedEvidenceNumerator = 0;
+
+      for (let i = 0; i < 5; i++) {
+        const raw = coffee.scores[i];
+        const ev = coffee.evidence[i];
+        const isMissing = (raw === null || raw === '' || isNaN(raw) || ev === 0);
+
+        if (isMissing) {
+          missingCount++;
+          effectiveScores1to5.push(provScore);
+        } else {
+          effectiveScores1to5.push(Math.max(0, Math.min(100, Number(raw))));
+        }
+
+        // Evidence contribution uses effective evidence (0 if raw score is missing)
+        const effectiveEv = isMissing ? 0 : ev;
+        weightedEvidenceNumerator += w1to5[i] * effectiveEv;
+      }
+
+      // KPI 6 = SUMPRODUCT(w1..5, ev1..5) / (2 * SUM(w1..5)) * 100
+      const kpi6Score = sumW1to5 > 0 ? (weightedEvidenceNumerator / (2 * sumW1to5)) * 100 : 0;
+      const allEffectiveScores = [...effectiveScores1to5, kpi6Score];
+
+      // Weighted Total Score (normalized by totalWeight if user edits weights away from 100)
+      let weightedSum = 0;
+      for (let i = 0; i < 6; i++) {
+        weightedSum += (weights[i] / (totalWeight || 100)) * allEffectiveScores[i];
+      }
+
+      // Letter Grade (A..E)
+      let grade = 'E';
+      if (weightedSum >= cutoffs.A) grade = 'A';
+      else if (weightedSum >= cutoffs.B) grade = 'B';
+      else if (weightedSum >= cutoffs.C) grade = 'C';
+      else if (weightedSum >= cutoffs.D) grade = 'D';
+
+      // Confidence % equals KPI 6 verification coverage %
+      const confidencePct = kpi6Score;
+      let confidenceLabel = 'Low';
+      if (confidencePct >= confHigh) confidenceLabel = 'High';
+      else if (confidencePct >= confMed) confidenceLabel = 'Medium';
+
+      const status = missingCount === 0 ? 'Complete' : 'Provisional score';
+
+      return {
+        effectiveScores: allEffectiveScores,
+        kpi6Score,
+        totalScore: weightedSum,
+        grade,
+        confidencePct,
+        confidenceLabel,
+        missingCount,
+        status
+      };
+    }
+
+    function computeAllResults(customWeights = null) {
+      const weights = customWeights || appState.weights;
+      const results = {};
+      ['A', 'B', 'C'].forEach(key => {
+        results[key] = evaluateCoffee(
+          appState.coffees[key],
+          weights,
+          appState.provisionalScore,
+          appState.confHigh,
+          appState.confMed,
+          appState.gradeCutoffs
+        );
+      });
+
+      // Compute Ranks (1 = highest score)
+      const sortedKeys = ['A', 'B', 'C'].sort((x, y) => results[y].totalScore - results[x].totalScore);
+      sortedKeys.forEach((k, idx) => {
+        results[k].rank = idx + 1;
+      });
+      results.rankOrderString = sortedKeys.join(' > ');
+      return results;
+    }
+
+    /* ========================================================================
+       4. TAB NAVIGATION & SHEET SWITCHING
+       ======================================================================== */
+    function animateSelectionTone(tab, fromStyle, toStyle, duration, originalTransition) {
+      if (typeof tab.animate !== 'function') return;
+
+      const animation = tab.animate([
+        {
+          backgroundColor: fromStyle.backgroundColor,
+          color: fromStyle.color,
+          borderColor: fromStyle.borderColor,
+          boxShadow: fromStyle.boxShadow
+        },
+        {
+          backgroundColor: toStyle.backgroundColor,
+          color: toStyle.color,
+          borderColor: toStyle.borderColor,
+          boxShadow: toStyle.boxShadow
+        }
+      ], {
+        duration,
+        easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+      });
+
+      const animationState = { animation, originalTransition };
+      selectionToneAnimations.set(tab, animationState);
+      const restoreTransition = () => {
+        if (selectionToneAnimations.get(tab) !== animationState) return;
+        if (originalTransition.value) {
+          tab.style.setProperty('transition', originalTransition.value, originalTransition.priority);
+        } else {
+          tab.style.removeProperty('transition');
+        }
+        selectionToneAnimations.delete(tab);
+      };
+      animation.onfinish = restoreTransition;
+      animation.oncancel = restoreTransition;
+    }
+
+    function switchSheet(sheetId) {
+      try {
+        const panels = Array.from(document.querySelectorAll('.sheet-panel'));
+        const currentIndex = panels.findIndex(panel => panel.classList.contains('active'));
+        const targetIndex = panels.findIndex(panel => panel.id === sheetId);
+        if (targetIndex < 0) return;
+        const direction = targetIndex >= currentIndex ? 1 : -1;
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        const tabs = Array.from(document.querySelectorAll('.sheet-tab'));
+        const changedTabs = tabs.filter(btn => btn.classList.contains('active') !== (btn.dataset.sheet === sheetId));
+        const beforeStyles = new Map(changedTabs.map(btn => {
+          const style = getComputedStyle(btn);
+          return [btn, {
+            backgroundColor: style.backgroundColor,
+            color: style.color,
+            borderColor: style.borderColor,
+            boxShadow: style.boxShadow
+          }];
+        }));
+
+        const transitionSnapshots = new Map();
+        changedTabs.forEach(btn => {
+          if (typeof btn.animate !== 'function') return;
+          const previousAnimation = selectionToneAnimations.get(btn);
+          if (previousAnimation) previousAnimation.animation.cancel();
+          transitionSnapshots.set(btn, {
+            value: btn.style.getPropertyValue('transition'),
+            priority: btn.style.getPropertyPriority('transition')
+          });
+          btn.style.setProperty('transition', 'none', 'important');
+        });
+
+        tabs.forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.sheet === sheetId);
+        });
+
+        changedTabs.forEach(btn => {
+          if (transitionSnapshots.has(btn)) void btn.offsetWidth;
+        });
+
+        changedTabs.forEach(btn => {
+          if (!transitionSnapshots.has(btn)) return;
+          const style = getComputedStyle(btn);
+          animateSelectionTone(btn, beforeStyles.get(btn), {
+            backgroundColor: style.backgroundColor,
+            color: style.color,
+            borderColor: style.borderColor,
+            boxShadow: style.boxShadow
+          }, reduceMotion ? 240 : 460, transitionSnapshots.get(btn));
+        });
+
+        const targetPanel = panels[targetIndex];
+        const currentPanel = currentIndex >= 0 ? panels[currentIndex] : null;
+        if (currentIndex === targetIndex) {
+          if (sheetId === 'sheet-4') renderConsumerPackView();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+
+        const transitionToken = ++sheetPanelTransitionToken;
+        const distance = reduceMotion ? 18 : 72;
+        const exitDuration = reduceMotion ? 160 : 240;
+        const enterDuration = reduceMotion ? 200 : 440;
+
+        sheetPanelExitAnimation?.cancel();
+        sheetPanelEnterAnimation?.cancel();
+
+        const showTargetPanel = () => {
+          if (transitionToken !== sheetPanelTransitionToken) return;
+          const finishedExitAnimation = sheetPanelExitAnimation;
+          sheetPanelExitAnimation = null;
+
+          panels.forEach(panel => {
+            panel.style.pointerEvents = '';
+            panel.classList.toggle('active', panel.id === sheetId);
+          });
+          finishedExitAnimation?.cancel();
+
+          // Refresh consumer view when opening Sheet 4 so live edits from Sheet 5 reflect immediately
+          if (sheetId === 'sheet-4') {
+            renderConsumerPackView();
+          }
+
+          setupRevealAnimations();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+
+          if (targetPanel && typeof targetPanel.animate === 'function') {
+            const enterFromX = direction > 0 ? distance : -distance;
+            sheetPanelEnterAnimation = targetPanel.animate([
+              { opacity: 0, transform: `translateX(${enterFromX}px)` },
+              { opacity: 1, transform: 'translateX(0)' }
+            ], {
+              duration: enterDuration,
+              easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+            });
+          }
+        };
+
+        if (currentPanel && typeof currentPanel.animate === 'function') {
+          const exitToX = direction > 0 ? -distance : distance;
+          currentPanel.style.pointerEvents = 'none';
+          sheetPanelExitAnimation = currentPanel.animate([
+            { opacity: 1, transform: 'translateX(0)' },
+            { opacity: 0, transform: `translateX(${exitToX}px)` }
+          ], {
+            duration: exitDuration,
+            easing: 'cubic-bezier(0.4, 0, 1, 1)',
+            fill: 'forwards'
+          });
+          sheetPanelExitAnimation.onfinish = showTargetPanel;
+        } else {
+          showTargetPanel();
+        }
+      } catch (err) {
+        console.error('Error switching sheet:', err);
+      }
+    }
+
+    /* ========================================================================
+       5. SHEET 1 RENDERERS (SUPPLY CHAIN STAGES & 4 BREAKS)
+       ======================================================================== */
+    function renderSupplyChainStages(transitionDirection = '', heightFrom = null, transitionToken = stageTransitionToken) {
+      const stepsContainer = document.getElementById('supply-chain-steps');
+      const inspector = document.getElementById('stage-inspector');
+      if (!stepsContainer || !inspector) return;
+
+      if (heightFrom !== null) {
+        inspector.style.height = `${heightFrom}px`;
+        inspector.style.overflow = 'hidden';
+      }
+
+      stepsContainer.innerHTML = SUPPLY_CHAIN_STAGES.map(stage => {
+        const isActive = stage.id === activeStageId;
+        return `
+          <button type="button" onclick="selectSupplyStage('${stage.id}')" aria-pressed="${isActive}"
+            class="paper-card paper-card-interactive stage-step-card ${isActive ? 'paper-card-active' : ''} p-4 text-left flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-mono-num text-xs font-bold px-2 py-0.5 rounded bg-[#1D1510] text-[#FFFDF9]">STAGE ${stage.step}</span>
+                <span class="text-[11px] font-medium text-[#7A6A5D]">${stage.location.split(' ')[0]}</span>
+              </div>
+              <div class="font-bold text-base text-[#1D1510] mt-2">${stage.title}</div>
+              <div class="text-xs text-[#B45309] font-medium mt-0.5">${stage.shortTag}</div>
+            </div>
+            <div class="mt-3 pt-2 border-t border-[#DFD5C5] flex items-center justify-between text-[11px] font-semibold ${isActive ? 'text-[#B45309]' : 'text-[#57483D]'}">
+              <span>${isActive ? 'Inspecting stage' : 'Click to inspect'}</span>
+              <span class="stage-card-arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </button>
+        `;
+      }).join('');
+
+      const activeStage = SUPPLY_CHAIN_STAGES.find(s => s.id === activeStageId) || SUPPLY_CHAIN_STAGES[0];
+      inspector.innerHTML = `
+        <div class="stage-inspector-content">
+        <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+          <div class="lg:w-7/12 space-y-3">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="font-mono-num text-xs font-bold px-2.5 py-1 rounded-md bg-[#B45309] text-white">STAGE ${activeStage.step}</span>
+              <span class="text-xs font-semibold text-[#57483D] bg-[#EFE9DD] px-2.5 py-1 rounded-md">${activeStage.location}</span>
+            </div>
+            <h3 class="text-2xl font-bold text-[#1D1510]">${activeStage.title}</h3>
+            <p class="text-sm text-[#4E3E33] leading-relaxed">${activeStage.summary}</p>
+
+            <div class="p-4 rounded-xl bg-[#FEF3C7]/70 border border-[#F59E0B]/60">
+              <div class="text-xs font-bold uppercase tracking-wider text-[#92400E]">Where Transparency Breaks Down</div>
+              <p class="text-sm text-[#1D1510] font-medium mt-1">${activeStage.bottleneck}</p>
+            </div>
+
+            <div class="pt-1">
+              <span class="text-xs font-bold uppercase tracking-wider text-[#7A6A5D]">Measured by Group 3 Indicators:</span>
+              <div class="flex flex-wrap gap-2 mt-1.5">
+                ${activeStage.kpisLinked.map(k => `<span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#E6F4EC] text-[#1B5E3A] border border-[#BBF7D0]">${k}</span>`).join('')}
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:w-5/12 bg-[#F7F3EC] border border-[#DFD5C5] rounded-xl p-4 space-y-3">
+            <div class="text-xs font-bold uppercase tracking-wider text-[#57483D]">Key Field Findings &amp; Risks at Stage ${activeStage.step}</div>
+            ${activeStage.impacts.map(item => `
+              <div class="bg-[#FFFDF9] p-3 rounded-lg border border-[#DFD5C5]">
+                <div class="text-xs font-bold text-[#B45309]">${item.category}</div>
+                <p class="text-xs text-[#4E3E33] mt-0.5 leading-relaxed">${item.text}</p>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        </div>
+      `;
+
+      const inspectorContent = inspector.querySelector('.stage-inspector-content');
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (transitionDirection && inspectorContent && typeof inspectorContent.animate === 'function') {
+        const offsetX = (transitionDirection === 'forward' ? 1 : -1) * (reduceMotion ? 18 : 64);
+        const duration = reduceMotion ? 220 : 520;
+        inspectorContent.animate([
+          { opacity: 0, transform: `translateX(${offsetX}px)`, filter: reduceMotion ? 'blur(0)' : 'blur(2px)' },
+          { opacity: 1, transform: 'translateX(0)', filter: 'blur(0)' }
+        ], {
+          duration,
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+        });
+
+        if (heightFrom !== null && typeof inspector.animate === 'function') {
+          const lockedHeight = inspector.style.height;
+          inspector.style.height = 'auto';
+          const targetHeight = inspector.offsetHeight;
+          inspector.style.height = lockedHeight;
+          void inspector.offsetHeight;
+          stageHeightAnimation = inspector.animate([
+            { height: `${heightFrom}px` },
+            { height: `${targetHeight}px` }
+          ], {
+            duration,
+            easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+          });
+          stageHeightAnimation.onfinish = () => {
+            if (transitionToken !== stageTransitionToken) return;
+            inspector.style.height = '';
+            inspector.style.overflow = '';
+            stageHeightAnimation = null;
+          };
+        } else if (heightFrom !== null) {
+          inspector.style.height = '';
+          inspector.style.overflow = '';
+        }
+      }
+    }
+
+    function selectSupplyStage(stageId) {
+      const currentIndex = SUPPLY_CHAIN_STAGES.findIndex(stage => stage.id === activeStageId);
+      const targetIndex = SUPPLY_CHAIN_STAGES.findIndex(stage => stage.id === stageId);
+      if (targetIndex < 0 || targetIndex === currentIndex) return;
+
+      const inspector = document.getElementById('stage-inspector');
+      const inspectorContent = inspector?.querySelector('.stage-inspector-content');
+      const direction = targetIndex > currentIndex ? 'forward' : 'backward';
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const offsetX = (direction === 'forward' ? -1 : 1) * (reduceMotion ? 18 : 64);
+      const exitDuration = reduceMotion ? 140 : 220;
+      const transitionToken = ++stageTransitionToken;
+      const currentHeight = inspector?.offsetHeight ?? null;
+
+      stageExitAnimation?.cancel();
+      stageHeightAnimation?.cancel();
+      if (inspector && currentHeight !== null) {
+        inspector.style.height = `${currentHeight}px`;
+        inspector.style.overflow = 'hidden';
+      }
+
+      const showTargetStage = () => {
+        if (transitionToken !== stageTransitionToken) return;
+        stageExitAnimation = null;
+        activeStageId = stageId;
+        renderSupplyChainStages(direction, currentHeight, transitionToken);
+      };
+
+      if (inspector && inspectorContent && typeof inspectorContent.animate === 'function') {
+        stageExitAnimation = inspectorContent.animate([
+          { opacity: 1, transform: 'translateX(0)', filter: 'blur(0)' },
+          { opacity: 0, transform: `translateX(${offsetX}px)`, filter: reduceMotion ? 'blur(0)' : 'blur(2px)' }
+        ], {
+          duration: exitDuration,
+          easing: 'cubic-bezier(0.4, 0, 1, 1)',
+          fill: 'forwards'
+        });
+        stageExitAnimation.onfinish = showTargetStage;
+      } else {
+        showTargetStage();
+      }
+    }
+
+    function renderTransparencyBreaks() {
+      const container = document.getElementById('breaks-grid');
+      if (!container) return;
+
+      container.innerHTML = TRANSPARENCY_BREAKS.map(b => `
+        <div class="paper-card p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-mono-num text-xs font-bold text-[#B45309] uppercase">${b.num}</span>
+              <span class="font-mono-num text-xs font-bold px-2.5 py-0.5 rounded-full bg-[#FEE2E2] text-[#B91C1C]">${b.stat}</span>
+            </div>
+            <h4 class="text-lg font-bold text-[#1D1510] mt-1">${b.title}</h4>
+            <div class="text-xs font-medium text-[#7A6A5D]">${b.subtitle}</div>
+            <p class="text-xs text-[#4E3E33] mt-2.5 leading-relaxed">${b.statDetail}</p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-[#DFD5C5] bg-[#E6F4EC]/55 -mx-5 -mb-5 p-4 rounded-b-[14px]">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-[#1B5E3A]">Coffee Impact Rating Response</div>
+            <p class="text-xs text-[#1D1510] mt-0.5 leading-relaxed">${b.solution}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    /* ========================================================================
+       6. SHEET 2 RENDERERS (VALUE DISTRIBUTION & BRAZIL DATA SOURCES)
+       ======================================================================== */
+    function updateValueModelButtons(mode, reduceMotion) {
+      const buttons = Array.from(document.querySelectorAll('.vmodel-btn'));
+      const changedButtons = buttons.filter(btn => btn.getAttribute('aria-pressed') !== String(btn.dataset.vmodel === mode));
+      const beforeStyles = new Map(changedButtons.map(btn => {
+        const style = getComputedStyle(btn);
+        return [btn, {
+          backgroundColor: style.backgroundColor,
+          color: style.color,
+          borderColor: style.borderColor,
+          boxShadow: style.boxShadow
+        }];
+      }));
+      const transitionSnapshots = new Map();
+
+      changedButtons.forEach(btn => {
+        if (typeof btn.animate !== 'function') return;
+        const previousAnimation = selectionToneAnimations.get(btn);
+        if (previousAnimation) previousAnimation.animation.cancel();
+        transitionSnapshots.set(btn, {
+          value: btn.style.getPropertyValue('transition'),
+          priority: btn.style.getPropertyPriority('transition')
+        });
+        btn.style.setProperty('transition', 'none', 'important');
+      });
+
+      buttons.forEach(btn => {
+        const active = btn.dataset.vmodel === mode;
+        btn.setAttribute('aria-pressed', String(active));
+        btn.className = active
+          ? 'vmodel-btn px-3.5 py-2 rounded-xl text-xs font-semibold border transition cursor-pointer bg-[#1D1510] text-[#FFFDF9] border-[#1D1510]'
+          : 'vmodel-btn px-3.5 py-2 rounded-xl text-xs font-semibold border transition cursor-pointer bg-[#FFFDF9] text-[#1D1510] border-[#DFD5C5] hover:border-[#B45309]';
+      });
+
+      changedButtons.forEach(btn => {
+        if (transitionSnapshots.has(btn)) void btn.offsetWidth;
+      });
+      changedButtons.forEach(btn => {
+        if (!transitionSnapshots.has(btn)) return;
+        const style = getComputedStyle(btn);
+        animateSelectionTone(btn, beforeStyles.get(btn), {
+          backgroundColor: style.backgroundColor,
+          color: style.color,
+          borderColor: style.borderColor,
+          boxShadow: style.boxShadow
+        }, reduceMotion ? 180 : 320, transitionSnapshots.get(btn));
+      });
+    }
+
+    function renderValueBreakdown(mode, transitionState = null) {
+      const container = document.getElementById('value-breakdown-display');
+      if (!container) return;
+
+      if (transitionState && transitionState.token !== valueBreakdownTransitionToken) return;
+
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const currentContent = container.firstElementChild;
+      if (!transitionState && currentContent && activeValueBreakdownMode === mode) return;
+      updateValueModelButtons(mode, reduceMotion);
+
+      if (!transitionState && currentContent) {
+        const modeOrder = ['german_kilo', 'ground_vs_capsule', 'caffenation'];
+        const previousIndex = modeOrder.indexOf(activeValueBreakdownMode);
+        const targetIndex = modeOrder.indexOf(mode);
+        const direction = previousIndex < 0 || targetIndex >= previousIndex ? 1 : -1;
+        const distance = reduceMotion ? 14 : 42;
+        const exitDuration = reduceMotion ? 120 : 180;
+        const transitionToken = ++valueBreakdownTransitionToken;
+        const currentHeight = container.offsetHeight;
+
+        valueBreakdownExitAnimation?.cancel();
+        valueBreakdownEnterAnimation?.cancel();
+        valueBreakdownHeightAnimation?.cancel();
+        container.style.height = `${currentHeight}px`;
+        container.style.overflow = 'hidden';
+        activeValueBreakdownMode = mode;
+
+        const showTargetContent = () => {
+          if (transitionToken !== valueBreakdownTransitionToken) return;
+          valueBreakdownExitAnimation = null;
+          renderValueBreakdown(mode, { token: transitionToken, currentHeight, direction, distance });
+        };
+
+        if (typeof currentContent.animate === 'function') {
+          const exitToX = direction > 0 ? -distance : distance;
+          valueBreakdownExitAnimation = currentContent.animate([
+            { opacity: 1, transform: 'translateX(0)' },
+            { opacity: 0, transform: `translateX(${exitToX}px)` }
+          ], {
+            duration: exitDuration,
+            easing: 'cubic-bezier(0.4, 0, 1, 1)',
+            fill: 'forwards'
+          });
+          valueBreakdownExitAnimation.onfinish = showTargetContent;
+        } else {
+          showTargetContent();
+        }
+        return;
+      }
+
+      if (!transitionState) activeValueBreakdownMode = mode;
+
+      if (mode === 'german_kilo') {
+        container.innerHTML = `
+          <div class="space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
+              <div>
+                <h4 class="text-lg font-bold text-[#1D1510]">Standard Branded Retail Coffee: €9.71 / kg (Coffee Barometer 2026)</h4>
+                <p class="text-xs text-[#4E3E33]">For every €9.71 paid by a European shopper, the coffee farmer receives €2.05 gross—and after €1.64 in farm production costs, keeps just <strong>€0.41 net</strong>.</p>
+              </div>
+              <span class="font-mono-num text-xs font-bold px-2.5 py-1 rounded bg-[#FEE2E2] text-[#B91C1C]">Net Farmer Margin: 4.2%</span>
+            </div>
+
+            <!-- Stacked Visual Bar -->
+            <div class="w-full h-11 rounded-xl overflow-hidden flex font-mono-num text-xs font-bold shadow-inner border border-[#DFD5C5]">
+              <div style="width: 4.2%" class="bg-[#038141] text-white flex items-center justify-center" title="Farmer Net Income: €0.41">€0.41</div>
+              <div style="width: 16.9%" class="bg-[#FECB02] text-[#1D1510] flex items-center justify-center" title="Farm Production Costs: €1.64">Costs €1.64</div>
+              <div style="width: 78.9%" class="bg-[#3B2618] text-[#FFFDF9] flex items-center justify-center" title="Downstream Traders, Roasters, Retail & Taxes: €7.66">Downstream Value Chain: €7.66 (78.9%)</div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div class="p-3.5 rounded-xl bg-[#E6F4EC] border border-[#BBF7D0]">
+                <div class="text-xs font-bold text-[#1B5E3A]">Farmer Net Income</div>
+                <div class="font-mono-num text-xl font-bold text-[#1D1510] mt-0.5">€0.41 / kg</div>
+                <div class="text-xs text-[#4E3E33] mt-0.5">Left over after fertilizers, labor, and farm upkeep.</div>
+              </div>
+              <div class="p-3.5 rounded-xl bg-[#FEF3C7] border border-[#FDE68A]">
+                <div class="text-xs font-bold text-[#92400E]">Farmer Gross Farmgate Price</div>
+                <div class="font-mono-num text-xl font-bold text-[#1D1510] mt-0.5">€2.05 / kg (21.1%)</div>
+                <div class="text-xs text-[#4E3E33] mt-0.5">Includes €1.64 production costs; unpaid family labor adds up to ~10% of retail value.</div>
+              </div>
+              <div class="p-3.5 rounded-xl bg-[#F7F3EC] border border-[#DFD5C5]">
+                <div class="text-xs font-bold text-[#57483D]">Traders, Roasters &amp; Retail</div>
+                <div class="font-mono-num text-xl font-bold text-[#1D1510] mt-0.5">€7.66 / kg (78.9%)</div>
+                <div class="text-xs text-[#4E3E33] mt-0.5">Export, shipping, roasting, packaging, retail margin &amp; VAT—none disclosed by top 15 firms.</div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (mode === 'ground_vs_capsule') {
+        container.innerHTML = `
+          <div class="space-y-5">
+            <div>
+              <h4 class="text-lg font-bold text-[#1D1510]">Brewing Format Distortion: Ground Coffee vs. Single-Serve Capsules</h4>
+              <p class="text-xs text-[#4E3E33]">Selling the exact same coffee in capsules multiplies the retail price by 4.5× (€35.98/kg vs. €8.06/kg), slashing the farmer's share from ~24% down to ~6% (SCA / BASIC / Coffee Barometer 2026).</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="p-4 rounded-xl bg-[#F7F3EC] border border-[#DFD5C5] space-y-2.5">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-sm text-[#1D1510]">Branded Ground Coffee</span>
+                  <span class="font-mono-num text-sm font-bold text-[#1D1510]">€8.06 / kg</span>
+                </div>
+                <div class="w-full h-8 rounded-lg overflow-hidden flex font-mono-num text-xs font-bold">
+                  <div style="width: 24%" class="bg-[#038141] text-white flex items-center justify-center">~24%</div>
+                  <div style="width: 76%" class="bg-[#4E3E33] text-white flex items-center justify-center">76% Downstream</div>
+                </div>
+                <p class="text-xs text-[#4E3E33]">Approximately <strong>~24% (~€1.93/kg)</strong> returns to the coffee producer.</p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-[#FFFBF2] border border-[#F59E0B] space-y-2.5">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-sm text-[#1D1510]">Single-Serve Capsules</span>
+                  <span class="font-mono-num text-sm font-bold text-[#B45309]">€35.98 / kg</span>
+                </div>
+                <div class="w-full h-8 rounded-lg overflow-hidden flex font-mono-num text-xs font-bold">
+                  <div style="width: 6%" class="bg-[#E63E11] text-white flex items-center justify-center">6%</div>
+                  <div style="width: 94%" class="bg-[#1D1510] text-white flex items-center justify-center">94% Packaging, Brand &amp; Retail</div>
+                </div>
+                <p class="text-xs text-[#4E3E33]">Only <strong>~6% (~€2.16/kg)</strong> reaches the farmer—while aluminium/plastic pods add heavy per-cup waste.</p>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div class="space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h4 class="text-lg font-bold text-[#1D1510]">Caffenation (Belgian Specialty Roaster) — 2024 Transparency Report</h4>
+                <p class="text-xs text-[#4E3E33]">An example of radical purchasing disclosure in Belgium—alongside Kaffeemacher’s warning that FOB price alone does not automatically guarantee net farmer profitability.</p>
+              </div>
+              <span class="font-mono-num text-xs font-bold px-2.5 py-1 rounded bg-[#E6F4EC] text-[#1B5E3A]">100% FOB Disclosed</span>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              <div class="p-3 rounded-xl bg-[#F7F3EC] border border-[#DFD5C5]">
+                <div class="text-[11px] text-[#7A6A5D] font-semibold">Coffees Purchased</div>
+                <div class="font-mono-num text-xl font-bold text-[#1D1510]">56 lots</div>
+              </div>
+              <div class="p-3 rounded-xl bg-[#F7F3EC] border border-[#DFD5C5]">
+                <div class="text-[11px] text-[#7A6A5D] font-semibold">Total Volume</div>
+                <div class="font-mono-num text-xl font-bold text-[#1D1510]">931 bags</div>
+              </div>
+              <div class="p-3 rounded-xl bg-[#F7F3EC] border border-[#DFD5C5]">
+                <div class="text-[11px] text-[#7A6A5D] font-semibold">Origins Sourced</div>
+                <div class="font-mono-num text-xl font-bold text-[#1D1510]">11 countries</div>
+              </div>
+              <div class="p-3 rounded-xl bg-[#F7F3EC] border border-[#DFD5C5]">
+                <div class="text-[11px] text-[#7A6A5D] font-semibold">Avg Cupping Score</div>
+                <div class="font-mono-num text-xl font-bold text-[#1B5E3A]">86.5 pts</div>
+              </div>
+              <div class="p-3 rounded-xl bg-[#E6F4EC] border border-[#BBF7D0] col-span-2 sm:col-span-1">
+                <div class="text-[11px] text-[#1B5E3A] font-semibold">Average FOB Price</div>
+                <div class="font-mono-num text-xl font-bold text-[#1D1510]">$8.03 / kg</div>
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-[#EFE9DD] text-xs text-[#1D1510]">
+              <strong>Kaffeemacher &amp; Caffenation Takeaway:</strong> Disclosing FOB export prices ($8.03/kg vs. volatile commodity prices) builds vital accountability, but true fairness requires comparing farmgate receipts against local labor, fertilizer, climate, and harvest yield costs.
+            </div>
+          </div>
+        `;
+      }
+
+      if (transitionState) {
+        const nextContent = container.firstElementChild;
+        const enterDuration = reduceMotion ? 200 : 360;
+        if (nextContent && typeof nextContent.animate === 'function') {
+          const enterFromX = transitionState.direction > 0 ? transitionState.distance : -transitionState.distance;
+          valueBreakdownEnterAnimation = nextContent.animate([
+            { opacity: 0, transform: `translateX(${enterFromX}px)` },
+            { opacity: 1, transform: 'translateX(0)' }
+          ], {
+            duration: enterDuration,
+            easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+          });
+
+          const lockedHeight = container.style.height;
+          container.style.height = 'auto';
+          const targetHeight = container.offsetHeight;
+          container.style.height = lockedHeight;
+          void container.offsetHeight;
+
+          valueBreakdownHeightAnimation = container.animate([
+            { height: `${transitionState.currentHeight}px` },
+            { height: `${targetHeight}px` }
+          ], {
+            duration: enterDuration,
+            easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+          });
+          valueBreakdownHeightAnimation.onfinish = () => {
+            if (transitionState.token !== valueBreakdownTransitionToken) return;
+            container.style.height = '';
+            container.style.overflow = '';
+            valueBreakdownHeightAnimation = null;
+          };
+        } else {
+          container.style.height = '';
+          container.style.overflow = '';
+        }
+      }
+    }
+
+    function selectBrazilSource(sourceKey) {
+      const src = BRAZIL_SOURCES[sourceKey];
+      const detail = document.getElementById('brazil-source-detail');
+      if (!src || !detail) return;
+
+      const buttons = Array.from(document.querySelectorAll('.bsource-btn'));
+      const targetIndex = buttons.findIndex(btn => btn.dataset.bsource === sourceKey);
+      const currentIndex = buttons.findIndex(btn => btn.dataset.bsource === activeBrazilSourceId);
+      const currentContent = detail.querySelector('.brazil-source-detail-content');
+      if (sourceKey === activeBrazilSourceId && currentContent) return;
+
+      const direction = currentIndex < 0 || targetIndex >= currentIndex ? 1 : -1;
+      const transitionToken = ++brazilSourceTransitionToken;
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const distance = reduceMotion ? 14 : 42;
+      const exitDuration = reduceMotion ? 120 : 180;
+      const enterDuration = reduceMotion ? 200 : 360;
+      const currentHeight = detail.offsetHeight;
+
+      const changedButtons = buttons.filter(btn => btn.classList.contains('paper-card-active') !== (btn.dataset.bsource === sourceKey));
+      const buttonBeforeStyles = new Map(changedButtons.map(btn => {
+        const style = getComputedStyle(btn);
+        return [btn, {
+          backgroundColor: style.backgroundColor,
+          color: style.color,
+          borderColor: style.borderColor,
+          boxShadow: style.boxShadow
+        }];
+      }));
+      const buttonTransitionSnapshots = new Map();
+      changedButtons.forEach(btn => {
+        if (typeof btn.animate !== 'function') return;
+        const previousAnimation = selectionToneAnimations.get(btn);
+        if (previousAnimation) previousAnimation.animation.cancel();
+        buttonTransitionSnapshots.set(btn, {
+          value: btn.style.getPropertyValue('transition'),
+          priority: btn.style.getPropertyPriority('transition')
+        });
+        btn.style.setProperty('transition', 'none', 'important');
+      });
+
+      brazilSourceExitAnimation?.cancel();
+      brazilSourceEnterAnimation?.cancel();
+      brazilSourceHeightAnimation?.cancel();
+      detail.style.height = `${currentHeight}px`;
+      detail.style.overflow = 'hidden';
+
+      activeBrazilSourceId = sourceKey;
+      buttons.forEach(btn => {
+        const isActive = btn.dataset.bsource === sourceKey;
+        btn.classList.toggle('paper-card-active', isActive);
+        btn.setAttribute('aria-pressed', String(isActive));
+      });
+      changedButtons.forEach(btn => {
+        if (buttonTransitionSnapshots.has(btn)) void btn.offsetWidth;
+      });
+      changedButtons.forEach(btn => {
+        if (!buttonTransitionSnapshots.has(btn)) return;
+        const style = getComputedStyle(btn);
+        animateSelectionTone(btn, buttonBeforeStyles.get(btn), {
+          backgroundColor: style.backgroundColor,
+          color: style.color,
+          borderColor: style.borderColor,
+          boxShadow: style.boxShadow
+        }, reduceMotion ? 180 : 320, buttonTransitionSnapshots.get(btn));
+      });
+
+      const renderSourceDetail = () => {
+        if (transitionToken !== brazilSourceTransitionToken) return;
+        brazilSourceExitAnimation = null;
+        detail.innerHTML = `
+          <div class="brazil-source-detail-content">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h4 class="font-bold text-base text-[#1D1510]">${src.title}</h4>
+              <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#1D1510] text-[#FFFDF9]">${src.badge}</span>
+            </div>
+            <p class="text-xs text-[#4E3E33] mt-2 leading-relaxed">${src.description}</p>
+            <div class="mt-3 pt-2.5 border-t border-[#DFD5C5] text-xs text-[#1D1510]">
+              <strong class="text-[#1B5E3A]">How Group 3 Uses It:</strong> ${src.roleInRating}
+            </div>
+          </div>
+        `;
+
+        const nextContent = detail.querySelector('.brazil-source-detail-content');
+        if (nextContent && currentContent && typeof nextContent.animate === 'function') {
+          const enterFromX = direction > 0 ? distance : -distance;
+          brazilSourceEnterAnimation = nextContent.animate([
+            { opacity: 0, transform: `translateX(${enterFromX}px)` },
+            { opacity: 1, transform: 'translateX(0)' }
+          ], {
+            duration: enterDuration,
+            easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+          });
+
+          const lockedHeight = detail.style.height;
+          detail.style.height = 'auto';
+          const targetHeight = detail.offsetHeight;
+          detail.style.height = lockedHeight;
+          void detail.offsetHeight;
+
+          brazilSourceHeightAnimation = detail.animate([
+            { height: `${currentHeight}px` },
+            { height: `${targetHeight}px` }
+          ], {
+            duration: enterDuration,
+            easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+          });
+          brazilSourceHeightAnimation.onfinish = () => {
+            if (transitionToken !== brazilSourceTransitionToken) return;
+            detail.style.height = '';
+            detail.style.overflow = '';
+            brazilSourceHeightAnimation = null;
+          };
+        } else {
+          detail.style.height = '';
+          detail.style.overflow = '';
+        }
+      };
+
+      if (currentContent && typeof currentContent.animate === 'function') {
+        const exitToX = direction > 0 ? -distance : distance;
+        brazilSourceExitAnimation = currentContent.animate([
+          { opacity: 1, transform: 'translateX(0)' },
+          { opacity: 0, transform: `translateX(${exitToX}px)` }
+        ], {
+          duration: exitDuration,
+          easing: 'cubic-bezier(0.4, 0, 1, 1)',
+          fill: 'forwards'
+        });
+        brazilSourceExitAnimation.onfinish = renderSourceDetail;
+      } else {
+        renderSourceDetail();
+      }
+    }
+
+    /* ========================================================================
+       7. SHEET 3 RENDERERS (LABELS COMPARISON & IDEA C TEMPLATE)
+       ======================================================================== */
+    function renderLabelsAndGovernance() {
+      const grid = document.getElementById('labels-grid');
+      if (grid) {
+        grid.innerHTML = LABEL_COMPARISONS.map(item => `
+          <div class="paper-card p-4 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full ${item.tagColor}">${item.focus}</span>
+                <span class="font-mono-num text-[11px] text-[#7A6A5D]">${item.share}</span>
+              </div>
+              <h4 class="font-bold text-lg text-[#1D1510]">${item.name}</h4>
+              <p class="text-xs text-[#1B5E3A] mt-2"><strong>What it covers:</strong> ${item.strength}</p>
+            </div>
+            <p class="text-xs text-[#57483D] mt-2.5 pt-2.5 border-t border-[#DFD5C5]"><strong>Gap / Limitation:</strong> ${item.blindSpot}</p>
+          </div>
+        `).join('');
+      }
+
+      const tbody = document.getElementById('idea-c-table-body');
+      if (tbody) {
+        tbody.innerHTML = appState.kpis.map((kpi, idx) => `
+          <tr class="hover:bg-[#F7F3EC]">
+            <td class="py-3 pr-3 font-semibold text-[#1D1510]">KPI ${kpi.id}: ${kpi.name}</td>
+            <td class="py-3 px-3 font-mono-num font-bold text-[#B45309]">${appState.weights[idx]}%</td>
+            <td class="py-3 px-3 text-xs text-[#4E3E33]">${kpi.measure}</td>
+            <td class="py-3 px-3 text-xs text-[#1B5E3A]">${kpi.level2Req}</td>
+            <td class="py-3 pl-3 text-xs text-[#57483D]">${kpi.level1Req}</td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    /* ========================================================================
+       8. SHEET 4 RENDERERS (CONSUMER 3-TIER PACK & QR SCANNER)
+       ======================================================================== */
+    function updateConsumerCoffeeButtons(code, reduceMotion) {
+      const buttons = Array.from(document.querySelectorAll('.ccoffee-btn'));
+      const changedButtons = buttons.filter(btn => btn.getAttribute('aria-pressed') !== String(btn.dataset.ccoffee === code));
+      const beforeStyles = new Map(changedButtons.map(btn => {
+        const style = getComputedStyle(btn);
+        return [btn, {
+          backgroundColor: style.backgroundColor,
+          color: style.color,
+          borderColor: style.borderColor,
+          boxShadow: style.boxShadow
+        }];
+      }));
+      const transitionSnapshots = new Map();
+
+      changedButtons.forEach(btn => {
+        if (typeof btn.animate !== 'function') return;
+        const previousAnimation = selectionToneAnimations.get(btn);
+        if (previousAnimation) previousAnimation.animation.cancel();
+        transitionSnapshots.set(btn, {
+          value: btn.style.getPropertyValue('transition'),
+          priority: btn.style.getPropertyPriority('transition')
+        });
+        btn.style.setProperty('transition', 'none', 'important');
+      });
+
+      buttons.forEach(btn => {
+        const active = btn.dataset.ccoffee === code;
+        btn.setAttribute('aria-pressed', String(active));
+        btn.className = active
+          ? 'ccoffee-btn px-3.5 py-2 rounded-xl text-xs font-semibold border transition cursor-pointer bg-[#1D1510] text-[#FFFDF9] border-[#1D1510]'
+          : 'ccoffee-btn px-3.5 py-2 rounded-xl text-xs font-semibold border transition cursor-pointer bg-[#FFFDF9] text-[#1D1510] border-[#DFD5C5] hover:border-[#B45309]';
+      });
+
+      changedButtons.forEach(btn => {
+        if (transitionSnapshots.has(btn)) void btn.offsetWidth;
+      });
+      changedButtons.forEach(btn => {
+        if (!transitionSnapshots.has(btn)) return;
+        const style = getComputedStyle(btn);
+        animateSelectionTone(btn, beforeStyles.get(btn), {
+          backgroundColor: style.backgroundColor,
+          color: style.color,
+          borderColor: style.borderColor,
+          boxShadow: style.boxShadow
+        }, reduceMotion ? 180 : 320, transitionSnapshots.get(btn));
+      });
+    }
+
+    function selectConsumerCoffee(code) {
+      if (!appState.coffees[code] || code === selectedConsumerCoffee) return;
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      selectedConsumerCoffee = code;
+      updateConsumerCoffeeButtons(code, reduceMotion);
+      renderConsumerPackView(true);
+    }
+
+    function renderConsumerPackView(animateTransition = false, transitionState = null) {
+      const container = document.getElementById('consumer-three-tiers');
+      if (!container) return;
+
+      if (transitionState && transitionState.token !== consumerPackTransitionToken) return;
+      if (!animateTransition && !transitionState) {
+        consumerPackTransitionToken++;
+        consumerPackExitAnimation?.cancel();
+        consumerPackEnterAnimation?.cancel();
+        consumerPackHeightAnimation?.cancel();
+        consumerPackExitAnimation = null;
+        consumerPackEnterAnimation = null;
+        consumerPackHeightAnimation = null;
+        container.style.height = '';
+        container.style.overflow = '';
+      }
+      if (transitionState) {
+        consumerPackExitAnimation?.cancel();
+        consumerPackExitAnimation = null;
+      }
+
+      if (!transitionState && animateTransition && container.firstElementChild && renderedConsumerCoffee !== selectedConsumerCoffee) {
+        const coffeeOrder = ['A', 'B', 'C'];
+        const previousIndex = coffeeOrder.indexOf(renderedConsumerCoffee);
+        const targetIndex = coffeeOrder.indexOf(selectedConsumerCoffee);
+        const direction = previousIndex < 0 || targetIndex >= previousIndex ? 1 : -1;
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const distance = reduceMotion ? 16 : 52;
+        const exitDuration = reduceMotion ? 130 : 200;
+        const currentHeight = container.offsetHeight;
+        const transitionToken = ++consumerPackTransitionToken;
+
+        consumerPackExitAnimation?.cancel();
+        consumerPackEnterAnimation?.cancel();
+        consumerPackHeightAnimation?.cancel();
+        container.style.height = `${currentHeight}px`;
+        container.style.overflow = 'hidden';
+
+        const showSelectedCoffee = () => {
+          if (transitionToken !== consumerPackTransitionToken) return;
+          renderConsumerPackView(false, { token: transitionToken, currentHeight, direction, distance });
+        };
+
+        if (typeof container.animate === 'function') {
+          const exitToX = direction > 0 ? -distance : distance;
+          consumerPackExitAnimation = container.animate([
+            { opacity: 1, transform: 'translateX(0)' },
+            { opacity: 0, transform: `translateX(${exitToX}px)` }
+          ], {
+            duration: exitDuration,
+            easing: 'cubic-bezier(0.4, 0, 1, 1)',
+            fill: 'forwards'
+          });
+          consumerPackExitAnimation.onfinish = showSelectedCoffee;
+        } else {
+          showSelectedCoffee();
+        }
+        return;
+      }
+
+      const results = computeAllResults();
+      const coffee = appState.coffees[selectedConsumerCoffee];
+      const evalRes = results[selectedConsumerCoffee];
+
+      const confBadgeClass =
+        evalRes.confidenceLabel === 'High' ? 'bg-[#E6F4EC] text-[#1B5E3A] border-[#BBF7D0]' :
+        evalRes.confidenceLabel === 'Medium' ? 'bg-[#FEF3C7] text-[#92400E] border-[#FDE68A]' :
+        'bg-[#FEE2E2] text-[#B91C1C] border-[#FECACA]';
+
+      const grades = ['A', 'B', 'C', 'D', 'E'];
+
+      container.innerHTML = `
+        <!-- TIER 1: ON-PACK 3-SECOND SHELF GLANCE -->
+        <div class="lg:col-span-4 paper-card p-5 flex flex-col justify-between bg-[#FFFDF9]">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="font-mono-num text-xs font-bold text-[#B45309]">TIER 1 • ON-PACK LABEL</span>
+              <span class="text-[11px] text-[#7A6A5D]">3-Second Shelf Glance</span>
+            </div>
+            <h4 class="text-lg font-bold text-[#1D1510] mt-1">Front-of-Pack Impact Badge</h4>
+
+            <!-- Simulated Coffee Bag Label -->
+            <div class="mt-4 rounded-2xl border-2 border-[#1D1510] bg-[#F7F3EC] p-4 shadow-sm">
+              <div class="flex items-center justify-between border-b border-[#DFD5C5] pb-2.5">
+                <div>
+                  <div class="text-[10px] font-mono-num uppercase tracking-widest text-[#7A6A5D]">COIL COFFEE LAB • BELGIUM</div>
+                  <div class="font-editorial font-bold text-lg text-[#1D1510] leading-tight">${coffee.shortName}</div>
+                  <div class="text-xs text-[#4E3E33]">${coffee.packSubtitle}</div>
+                </div>
+                <div class="font-mono-num text-xs font-bold bg-[#1D1510] text-[#FFFDF9] px-2.5 py-1 rounded-lg">
+                  ${coffee.retailPrice}
+                </div>
+              </div>
+
+              <!-- Nutri-Score Style A-E Widget -->
+              <div class="mt-3.5 bg-[#FFFDF9] border border-[#DFD5C5] rounded-xl p-3">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-[11px] font-bold uppercase tracking-wider text-[#1D1510]">Coffee Impact Rating</span>
+                  <span class="font-mono-num text-xs font-bold text-[#57483D]">${evalRes.totalScore.toFixed(1)} / 100</span>
+                </div>
+
+                <div class="flex items-center justify-between gap-2">
+                  <div class="nutri-strip" aria-label="Impact Grade ${evalRes.grade}">
+                    ${grades.map(g => `
+                      <div class="nutri-letter grade-${g} ${evalRes.grade === g ? 'selected' : ''}">${g}</div>
+                    `).join('')}
+                  </div>
+
+                  <div class="text-right">
+                    <span class="inline-block text-[11px] font-bold px-2 py-0.5 rounded border ${confBadgeClass}">
+                      Confidence: ${evalRes.confidenceLabel} (${evalRes.confidencePct.toFixed(0)}%)
+                    </span>
+                    <div class="text-[10px] text-[#7A6A5D] mt-1">${evalRes.status}</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mock QR Trigger -->
+              <div class="mt-3 flex items-center justify-between bg-[#1D1510] text-[#FFFDF9] rounded-xl px-3 py-2 text-xs">
+                <span>Scan Smart QR for 6 KPIs &amp; Farm Map</span>
+                <span class="font-mono-num font-bold text-[#FECB02]">TIER 2 &amp; 3 &rarr;</span>
+              </div>
+            </div>
+          </div>
+
+          <p class="text-xs text-[#57483D] mt-4">
+            <strong>Why this works:</strong> Even if a shopper spends only 3 seconds comparing packs, Grade <strong>${evalRes.grade}</strong> and the <strong>${evalRes.confidenceLabel} Confidence</strong> badge prevent greenwashing.
+          </p>
+        </div>
+
+        <!-- TIER 2: SMART QR SCAN — 6 KPI SUB-SCORES -->
+        <div class="lg:col-span-4 paper-card p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="font-mono-num text-xs font-bold text-[#1B5E3A]">TIER 2 • SMART QR SCAN</span>
+              <span class="text-[11px] text-[#7A6A5D]">6 Shopper Questions</span>
+            </div>
+            <h4 class="text-lg font-bold text-[#1D1510] mt-1">Sub-Score Breakdown (0–100)</h4>
+
+            <div class="mt-3 space-y-2.5">
+              ${appState.kpis.map((kpi, idx) => {
+                const effScore = evalRes.effectiveScores[idx];
+                const isProv = idx < 5 && (coffee.scores[idx] === null || coffee.evidence[idx] === 0);
+                const evLevel = idx < 5 ? (isProv ? 0 : coffee.evidence[idx]) : 2;
+                const evBadge = idx === 5
+                  ? '<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#EFE9DD] text-[#1D1510]">Auto-Weighted</span>'
+                  : evLevel === 2
+                    ? '<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#E6F4EC] text-[#1B5E3A]">3rd-Party Verified</span>'
+                    : evLevel === 1
+                      ? '<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#FEF3C7] text-[#92400E]">Self-Declared</span>'
+                      : '<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#FEE2E2] text-[#B91C1C]">Missing -> Prov. ' + appState.provisionalScore + '</span>';
+
+                const barColor = effScore >= 75 ? '#038141' : effScore >= 50 ? '#85BB2F' : effScore >= 35 ? '#EE8100' : '#E63E11';
+
+                return `
+                  <div class="p-2.5 rounded-xl bg-[#F7F3EC] border border-[#DFD5C5]">
+                    <div class="flex items-center justify-between gap-2">
+                      <span class="text-xs font-bold text-[#1D1510]">${kpi.id}. ${kpi.name} <span class="font-mono-num font-normal text-[#7A6A5D]">(${appState.weights[idx]}%)</span></span>
+                      <span class="font-mono-num text-xs font-bold text-[#1D1510]">${effScore.toFixed(1)}</span>
+                    </div>
+                    <div class="text-[11px] text-[#57483D] italic">"${kpi.question}"</div>
+                    <div class="w-full h-2 bg-[#DFD5C5] rounded-full overflow-hidden mt-1.5">
+                      <div class="h-full bar-fill rounded-full" style="width: ${effScore}%; background-color: ${barColor};"></div>
+                    </div>
+                    <div class="mt-1.5 flex items-center justify-between">
+                      ${evBadge}
+                      <span class="text-[10px] text-[#7A6A5D]">Rank #${evalRes.rank} of 3</span>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+
+        <!-- TIER 3: FARM-TO-CUP JOURNEY MAP & ECONOMIC SPLIT -->
+        <div class="lg:col-span-4 paper-card p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="font-mono-num text-xs font-bold text-[#038141]">TIER 3 • FARM-TO-CUP MAP</span>
+              <span class="text-[11px] text-[#7A6A5D]">Physical &amp; Price Trace</span>
+            </div>
+            <h4 class="text-lg font-bold text-[#1D1510] mt-1">Verified Chain &amp; Unit Economics</h4>
+
+            <!-- Vertical Route Timeline -->
+            <div class="mt-3.5 relative pl-5 border-l-2 border-[#B45309] space-y-3">
+              ${coffee.originRoute.map((stop, sIdx) => `
+                <div class="relative">
+                  <span class="absolute -left-[25px] top-1 w-3 h-3 rounded-full ${sIdx === 0 ? 'bg-[#038141]' : sIdx === coffee.originRoute.length - 1 ? 'bg-[#1D1510]' : 'bg-[#B45309]'} border-2 border-[#FFFDF9]"></span>
+                  <div class="text-[10px] font-mono-num uppercase text-[#7A6A5D]">Step 0${sIdx + 1}</div>
+                  <div class="text-xs font-semibold text-[#1D1510]">${stop}</div>
+                </div>
+              `).join('')}
+            </div>
+
+            <!-- Key Consumer Takeaways -->
+            <div class="mt-4 grid grid-cols-2 gap-2.5">
+              <div class="p-3 rounded-xl bg-[#E6F4EC] border border-[#BBF7D0]">
+                <div class="text-[10px] font-bold uppercase text-[#1B5E3A]">Farmer Price Share</div>
+                <div class="font-mono-num text-xs font-bold text-[#1D1510] mt-0.5">${coffee.farmerShareEst}</div>
+              </div>
+              <div class="p-3 rounded-xl bg-[#F7F3EC] border border-[#DFD5C5]">
+                <div class="text-[10px] font-bold uppercase text-[#57483D]">Climate Cost / Cup</div>
+                <div class="font-mono-num text-xs font-bold text-[#1D1510] mt-0.5">${coffee.carbonPerCup}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-[#DFD5C5] text-xs text-[#4E3E33]">
+            Want to test changing this coffee's raw scores or evidence levels? Open <strong>Sheet 5: Live Scorecard</strong>.
+          </div>
+        </div>
+      `;
+
+      renderedConsumerCoffee = selectedConsumerCoffee;
+      if (transitionState) {
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const enterDuration = reduceMotion ? 220 : 400;
+        if (typeof container.animate === 'function') {
+          const enterFromX = transitionState.direction > 0 ? transitionState.distance : -transitionState.distance;
+          consumerPackEnterAnimation = container.animate([
+            { opacity: 0, transform: `translateX(${enterFromX}px)` },
+            { opacity: 1, transform: 'translateX(0)' }
+          ], {
+            duration: enterDuration,
+            easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+          });
+
+          const lockedHeight = container.style.height;
+          container.style.height = 'auto';
+          const targetHeight = container.offsetHeight;
+          container.style.height = lockedHeight;
+          void container.offsetHeight;
+
+          consumerPackHeightAnimation = container.animate([
+            { height: `${transitionState.currentHeight}px` },
+            { height: `${targetHeight}px` }
+          ], {
+            duration: enterDuration,
+            easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+          });
+          consumerPackHeightAnimation.onfinish = () => {
+            if (transitionState.token !== consumerPackTransitionToken) return;
+            container.style.height = '';
+            container.style.overflow = '';
+            consumerPackHeightAnimation = null;
+          };
+        } else {
+          container.style.height = '';
+          container.style.overflow = '';
+        }
+      }
+    }
+
+    /* ========================================================================
+       9. SHEET 5 RENDERERS (LIVE EXCEL SCORECARD & SENSITIVITY SIMULATOR)
+       ======================================================================== */
+    function animateResultsIn(elements, delayStep = 24) {
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const duration = reduceMotion ? 170 : 280;
+      const distance = reduceMotion ? 3 : 8;
+
+      Array.from(elements).forEach((element, index) => {
+        if (typeof element.animate !== 'function') return;
+        element.dataset.revealObserved = 'true';
+        element.classList.remove('reveal-ready');
+        element.classList.add('is-visible');
+        element.animate([
+          { opacity: 0, transform: `translateY(${distance}px)` },
+          { opacity: 1, transform: 'translateY(0)' }
+        ], {
+          duration,
+          delay: reduceMotion ? 0 : Math.min(index, 5) * delayStep,
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+        });
+      });
+    }
+
+    function animateComparisonBars(chartBox, previousWidths = []) {
+      if (!chartBox) return;
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const duration = reduceMotion ? 190 : 520;
+
+      chartBox.querySelectorAll('.bar-fill').forEach((bar, index) => {
+        const targetWidth = bar.style.width;
+        if (!targetWidth || typeof bar.animate !== 'function') return;
+        bar.animate([
+          { width: previousWidths[index] || '0%' },
+          { width: targetWidth }
+        ], {
+          duration,
+          delay: reduceMotion ? 0 : Math.min(index, 8) * 18,
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+        });
+      });
+    }
+
+    function renderMethodWeights() {
+      const container = document.getElementById('method-weights-container');
+      if (!container) return;
+
+      container.innerHTML = appState.kpis.map((kpi, idx) => `
+        <div class="flex items-center justify-between gap-2 bg-[#F7F3EC] border border-[#DFD5C5] rounded-xl px-3 py-2">
+          <div class="min-w-0">
+            <div class="text-xs font-bold text-[#1D1510] truncate">KPI ${kpi.id}: ${kpi.name}</div>
+            <div class="text-[10px] text-[#7A6A5D] truncate">${idx === 5 ? 'Auto-computed from KPI 1–5 evidence' : kpi.question}</div>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <input type="number" min="0" max="100" step="1" value="${Number(appState.weights[idx].toFixed(2))}"
+              onchange="updateWeight(${idx}, this.value)"
+              aria-label="Weight for ${kpi.name}"
+              class="excel-input w-16 text-right font-bold" />
+            <span class="font-mono-num text-xs text-[#57483D]">%</span>
+          </div>
+        </div>
+      `).join('');
+
+      if (methodWeightsHasRendered) animateResultsIn(container.children, 30);
+      methodWeightsHasRendered = true;
+
+      updateWeightSumBadge();
+    }
+
+    function updateWeightSumBadge() {
+      const badge = document.getElementById('weight-sum-badge');
+      if (!badge) return;
+      const sum = appState.weights.reduce((a, b) => a + b, 0);
+      const isOk = Math.abs(sum - 100) < 0.05;
+      badge.textContent = isOk
+        ? `Total Weight: ${sum.toFixed(1)}% (100% OK)`
+        : `Total Weight: ${sum.toFixed(1)}% (Auto-Normalized)`;
+      badge.className = isOk
+        ? 'font-mono-num text-xs font-bold px-3 py-1.5 rounded-full bg-[#E6F4EC] text-[#1B5E3A] border border-[#BBF7D0]'
+        : 'font-mono-num text-xs font-bold px-3 py-1.5 rounded-full bg-[#FEF3C7] text-[#92400E] border border-[#F59E0B]';
+    }
+
+    function updateWeight(idx, val) {
+      const num = parseFloat(val);
+      appState.weights[idx] = isNaN(num) ? 0 : Math.max(0, Math.min(100, num));
+      updateWeightSumBadge();
+      recalculateAll();
+    }
+
+    function normalizeWeights() {
+      const sum = appState.weights.reduce((a, b) => a + b, 0);
+      if (sum <= 0) {
+        appState.weights = [...DEFAULT_MODEL.weights];
+      } else {
+        appState.weights = appState.weights.map(w => Number(((w / sum) * 100).toFixed(2)));
+      }
+      renderMethodWeights();
+      recalculateAll();
+    }
+
+    function updateCoffeeInput(coffeeKey, kpiIdx, field, value) {
+      const coffee = appState.coffees[coffeeKey];
+      if (!coffee) return;
+
+      if (field === 'score') {
+        if (value === '' || value === null) {
+          coffee.scores[kpiIdx] = null;
+          coffee.evidence[kpiIdx] = 0;
+        } else {
+          const parsed = Math.max(0, Math.min(100, Number(value)));
+          coffee.scores[kpiIdx] = isNaN(parsed) ? null : parsed;
+          if (coffee.scores[kpiIdx] !== null && coffee.evidence[kpiIdx] === 0) {
+            coffee.evidence[kpiIdx] = 1; // Default to self-declared when user enters a score
+          }
+        }
+      } else if (field === 'evidence') {
+        const ev = parseInt(value, 10);
+        coffee.evidence[kpiIdx] = ev;
+        if (ev === 0) {
+          coffee.scores[kpiIdx] = null;
+        } else if (coffee.scores[kpiIdx] === null) {
+          coffee.scores[kpiIdx] = appState.provisionalScore;
+        }
+      }
+
+      recalculateAll();
+    }
+
+    function renderScorecardAndSensitivity() {
+      // Read latest parameter inputs
+      const provEl = document.getElementById('param-provisional');
+      const highEl = document.getElementById('param-conf-high');
+      const medEl = document.getElementById('param-conf-med');
+      if (provEl) appState.provisionalScore = Math.max(0, Math.min(100, Number(provEl.value) || 0));
+      if (highEl) appState.confHigh = Math.max(0, Math.min(100, Number(highEl.value) || 0));
+      if (medEl) appState.confMed = Math.max(0, Math.min(100, Number(medEl.value) || 0));
+
+      const results = computeAllResults();
+      const tbody = document.getElementById('scorecard-table-body');
+      if (!tbody) return;
+      const animateResults = scorecardHasRendered;
+      scorecardHasRendered = true;
+
+      const coffeeKeys = ['A', 'B', 'C'];
+      let rowsHtml = '';
+
+      // KPIs 1 to 5 Editable Input + Effective Score Rows
+      for (let i = 0; i < 5; i++) {
+        const kpi = appState.kpis[i];
+        rowsHtml += `
+          <tr class="hover:bg-[#F7F3EC]/70">
+            <td class="py-3 px-3">
+              <div class="font-bold text-[#1D1510]">KPI ${kpi.id}: ${kpi.name}</div>
+              <div class="text-[11px] text-[#7A6A5D]">${kpi.question}</div>
+            </td>
+            <td class="py-3 px-3 text-center font-mono-num font-semibold text-[#57483D]">
+              ${Number(appState.weights[i].toFixed(1))}%
+            </td>
+            ${coffeeKeys.map(k => {
+              const coffee = appState.coffees[k];
+              const rawVal = coffee.scores[i] === null ? '' : coffee.scores[i];
+              const evVal = coffee.evidence[i];
+              const effVal = results[k].effectiveScores[i];
+              const isProv = coffee.scores[i] === null || evVal === 0;
+
+              return `
+                <td class="py-3 px-3">
+                  <div class="flex items-center gap-1.5">
+                    <input type="number" min="0" max="100" placeholder="Empty"
+                      value="${rawVal}"
+                      onchange="updateCoffeeInput('${k}', ${i}, 'score', this.value)"
+                      aria-label="${coffee.shortName} KPI ${kpi.id} raw score"
+                      class="excel-input w-20 text-right font-semibold" />
+                    <select onchange="updateCoffeeInput('${k}', ${i}, 'evidence', this.value)"
+                      aria-label="${coffee.shortName} KPI ${kpi.id} evidence level"
+                      class="excel-input text-xs py-1.5 px-2 bg-[#FFFDF9]">
+                      <option value="0" ${evVal === 0 ? 'selected' : ''}>Ev 0: Missing</option>
+                      <option value="1" ${evVal === 1 ? 'selected' : ''}>Ev 1: Self-decl.</option>
+                      <option value="2" ${evVal === 2 ? 'selected' : ''}>Ev 2: 3rd-party</option>
+                    </select>
+                  </div>
+                  <div class="mt-1 text-[11px] font-mono-num ${isProv ? 'text-[#B45309] font-semibold' : 'text-[#57483D]'}">
+                    Effective: ${effVal.toFixed(1)} ${isProv ? '(Provisional)' : ''}
+                  </div>
+                </td>
+              `;
+            }).join('')}
+          </tr>
+        `;
+      }
+
+      // KPI 6 Auto-Calculated Verification Row
+      rowsHtml += `
+        <tr class="bg-[#EFE9DD]/65 font-medium">
+          <td class="py-3 px-3">
+            <div class="font-bold text-[#1D1510]">KPI 6: Verification level <span class="text-[10px] uppercase px-1.5 py-0.5 rounded bg-[#1D1510] text-white ml-1">Auto Formula</span></div>
+            <div class="text-[11px] text-[#57483D]">Weighted evidence coverage across KPIs 1–5 (Evidence fixed = 2)</div>
+          </td>
+          <td class="py-3 px-3 text-center font-mono-num font-semibold text-[#57483D]">${Number(appState.weights[5].toFixed(1))}%</td>
+          ${coffeeKeys.map(k => `
+            <td class="py-3 px-3 font-mono-num font-bold text-[#1D1510]">
+              ${results[k].kpi6Score.toFixed(2)} <span class="text-[11px] font-normal text-[#57483D]">/ 100</span>
+            </td>
+          `).join('')}
+        </tr>
+      `;
+
+      // Summary Output Rows (Weighted Total, Grade, Confidence, Status, Rank)
+      rowsHtml += `
+        <tr class="bg-[#FFFBF2] border-t-2 border-[#B45309]">
+          <td class="py-3.5 px-3 font-bold text-base text-[#1D1510]">Weighted Total Score (0–100)</td>
+          <td class="py-3.5 px-3 text-center font-mono-num text-xs text-[#7A6A5D]">100%</td>
+          ${coffeeKeys.map(k => `
+            <td class="py-3.5 px-3 font-mono-num text-xl font-extrabold text-[#1D1510]">
+              ${results[k].totalScore.toFixed(2)}
+            </td>
+          `).join('')}
+        </tr>
+
+        <tr class="bg-[#FFFDF9]">
+          <td class="py-3 px-3 font-bold text-[#1D1510]">Impact Grade (Nutri-Score A–E)</td>
+          <td class="py-3 px-3 text-center text-xs text-[#7A6A5D]">A &ge; 80</td>
+          ${coffeeKeys.map(k => `
+            <td class="py-3 px-3">
+              <span class="grade-pill grade-${results[k].grade} w-10 h-9 text-lg shadow-sm">${results[k].grade}</span>
+            </td>
+          `).join('')}
+        </tr>
+
+        <tr class="bg-[#F7F3EC]/60">
+          <td class="py-3 px-3 font-bold text-[#1D1510]">Data Confidence &amp; Status</td>
+          <td class="py-3 px-3 text-center text-xs text-[#7A6A5D]">High &ge; ${appState.confHigh}%</td>
+          ${coffeeKeys.map(k => {
+            const r = results[k];
+            const cColor = r.confidenceLabel === 'High' ? 'text-[#1B5E3A] bg-[#E6F4EC]' : r.confidenceLabel === 'Medium' ? 'text-[#92400E] bg-[#FEF3C7]' : 'text-[#B91C1C] bg-[#FEE2E2]';
+            return `
+              <td class="py-3 px-3">
+                <span class="font-mono-num text-xs font-bold px-2.5 py-1 rounded-full ${cColor}">
+                  ${r.confidencePct.toFixed(2)}% (${r.confidenceLabel})
+                </span>
+                <div class="text-[11px] text-[#57483D] mt-1">
+                  Missing KPIs: <strong>${r.missingCount}</strong> • ${r.status}
+                </div>
+              </td>
+            `;
+          }).join('')}
+        </tr>
+
+        <tr class="bg-[#1D1510] text-[#FFFDF9]">
+          <td class="py-3 px-3 font-bold rounded-bl-lg">Overall Ranking</td>
+          <td class="py-3 px-3 text-center text-xs text-[#DFD5C5]">1 = Best</td>
+          ${coffeeKeys.map((k, idx) => `
+            <td class="py-3 px-3 font-mono-num text-base font-bold ${idx === 2 ? 'rounded-br-lg' : ''}">
+              Rank #${results[k].rank}
+            </td>
+          `).join('')}
+        </tr>
+      `;
+
+      tbody.innerHTML = rowsHtml;
+      if (animateResults) animateResultsIn(tbody.children, 22);
+
+      // Render Visual Chart
+      renderLiveComparisonChart(results, animateResults);
+
+      // Render Sensitivity Table
+      renderSensitivityTable(results.rankOrderString, animateResults);
+    }
+
+    function renderLiveComparisonChart(results, animateResults = false) {
+      const chartBox = document.getElementById('live-comparison-chart');
+      if (!chartBox) return;
+      const previousWidths = animateResults
+        ? Array.from(chartBox.querySelectorAll('.bar-fill'), bar => bar.style.width)
+        : [];
+
+      const labels = ['KPI 1: Farmer Price', 'KPI 2: Traceability', 'KPI 3: Environment', 'KPI 4: Working Cond.', 'KPI 5: Carbon/Cup', 'KPI 6: Verification', 'TOTAL SCORE'];
+      const seriesA = [...results.A.effectiveScores, results.A.totalScore];
+      const seriesB = [...results.B.effectiveScores, results.B.totalScore];
+      const seriesC = [...results.C.effectiveScores, results.C.totalScore];
+
+      chartBox.innerHTML = `
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
+          ${labels.map((lbl, idx) => {
+            const isTotal = idx === 6;
+            const vA = seriesA[idx];
+            const vB = seriesB[idx];
+            const vC = seriesC[idx];
+            return `
+              <div class="p-3 rounded-xl ${isTotal ? 'bg-[#1D1510] text-[#FFFDF9]' : 'bg-[#FFFDF9] border border-[#DFD5C5]'} flex flex-col justify-between">
+                <div class="text-[11px] font-bold ${isTotal ? 'text-[#FECB02]' : 'text-[#57483D]'} mb-2">${lbl}</div>
+                <div class="space-y-1.5 font-mono-num text-[11px]">
+                  <div>
+                    <div class="flex justify-between"><span>A</span><span>${vA.toFixed(1)}</span></div>
+                    <div class="w-full h-2 bg-[#DFD5C5]/40 rounded overflow-hidden"><div class="h-full bg-[#EE8100] bar-fill" style="width:${vA}%"></div></div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between"><span>B</span><span>${vB.toFixed(1)}</span></div>
+                    <div class="w-full h-2 bg-[#DFD5C5]/40 rounded overflow-hidden"><div class="h-full bg-[#FECB02] bar-fill" style="width:${vB}%"></div></div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between"><span>C</span><span>${vC.toFixed(1)}</span></div>
+                    <div class="w-full h-2 bg-[#DFD5C5]/40 rounded overflow-hidden"><div class="h-full bg-[#85BB2F] bar-fill" style="width:${vC}%"></div></div>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+
+      if (animateResults) {
+        animateResultsIn(chartBox.querySelectorAll('.grid > div'), 18);
+        animateComparisonBars(chartBox, previousWidths);
+      }
+    }
+
+    function renderSensitivityTable(currentBaseRankOrder, animateResults = false) {
+      const tbody = document.getElementById('sensitivity-table-body');
+      if (!tbody) return;
+
+      tbody.innerHTML = SENSITIVITY_SCENARIOS.map((scen, idx) => {
+        const w = idx === 0 ? appState.weights : scen.weights;
+        const res = computeAllResults(w);
+        const matches = res.rankOrderString === currentBaseRankOrder;
+        const wFormatted = w.map(val => Number(val.toFixed(1))).join(' / ');
+
+        return `
+          <tr class="${idx === 0 ? 'bg-[#FFFBF2] font-semibold' : 'hover:bg-[#F7F3EC]'}">
+            <td class="py-3 px-3 text-[#1D1510]">${scen.name}</td>
+            <td class="py-3 px-3 font-mono-num text-xs text-[#57483D]">${wFormatted}</td>
+            <td class="py-3 px-3 text-right font-mono-num">
+              ${res.A.totalScore.toFixed(2)} <span class="grade-pill grade-${res.A.grade} px-1.5 py-0.5 text-[10px] ml-1">${res.A.grade}</span>
+            </td>
+            <td class="py-3 px-3 text-right font-mono-num">
+              ${res.B.totalScore.toFixed(2)} <span class="grade-pill grade-${res.B.grade} px-1.5 py-0.5 text-[10px] ml-1">${res.B.grade}</span>
+            </td>
+            <td class="py-3 px-3 text-right font-mono-num">
+              ${res.C.totalScore.toFixed(2)} <span class="grade-pill grade-${res.C.grade} px-1.5 py-0.5 text-[10px] ml-1">${res.C.grade}</span>
+            </td>
+            <td class="py-3 px-3 text-center font-mono-num font-bold text-[#1D1510]">${res.rankOrderString}</td>
+            <td class="py-3 px-3 text-center">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${matches ? 'bg-[#E6F4EC] text-[#1B5E3A]' : 'bg-[#FEF3C7] text-[#92400E]'}">
+                ${matches ? 'Yes' : 'No'}
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      if (animateResults) animateResultsIn(tbody.children, 35);
+    }
+
+    function recalculateAll() {
+      try {
+        renderScorecardAndSensitivity();
+        renderLabelsAndGovernance();
+        renderConsumerPackView();
+      } catch (err) {
+        console.error('Recalculation error:', err);
+      }
+    }
+
+    function setupRevealAnimations() {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      const candidates = document.querySelectorAll(
+        '.sheet-panel.active .paper-card, .sheet-panel.active .grid > div, ' +
+        '.sheet-panel.active tbody tr, .sheet-panel.active h2, .sheet-panel.active h3'
+      );
+
+      candidates.forEach((element, index) => {
+        if (element.dataset.revealObserved) return;
+        element.dataset.revealObserved = 'true';
+        element.classList.add('reveal-ready');
+        element.style.transitionDelay = `${Math.min(index % 6, 5) * 55}ms`;
+      });
+
+      if (!setupRevealAnimations.observer) {
+        setupRevealAnimations.observer = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+              setupRevealAnimations.observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.12, rootMargin: '0px 0px -35px 0px' });
+      }
+
+      candidates.forEach(element => {
+        if (!element.classList.contains('is-visible')) {
+          setupRevealAnimations.observer.observe(element);
+        }
+      });
+    }
+
+    function setupPageEnhancements() {
+      const progress = document.getElementById('scroll-progress');
+      const backToTop = document.getElementById('back-to-top');
+
+      const updatePageChrome = () => {
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        const percent = maxScroll > 0 ? (window.scrollY / maxScroll) * 100 : 0;
+        if (progress) progress.style.width = `${Math.min(100, Math.max(0, percent))}%`;
+        if (backToTop) backToTop.classList.toggle('visible', window.scrollY > 500);
+      };
+
+      window.addEventListener('scroll', updatePageChrome, { passive: true });
+      updatePageChrome();
+
+      if (backToTop) {
+        let buttonPulseAnimation = null;
+        let arrowBounceAnimation = null;
+        let scrollToTopFrame = null;
+        let previousScrollBehavior = null;
+
+        const restoreScrollBehavior = () => {
+          if (previousScrollBehavior === null) return;
+          const { value, priority } = previousScrollBehavior;
+          if (value) {
+            document.documentElement.style.setProperty('scroll-behavior', value, priority);
+          } else {
+            document.documentElement.style.removeProperty('scroll-behavior');
+          }
+          previousScrollBehavior = null;
+        };
+
+        const animatePageToTop = duration => {
+          if (scrollToTopFrame !== null) {
+            cancelAnimationFrame(scrollToTopFrame);
+            scrollToTopFrame = null;
+            restoreScrollBehavior();
+          }
+
+          const startY = window.scrollY;
+          if (startY <= 0) return;
+
+          const rootStyle = document.documentElement.style;
+          previousScrollBehavior = {
+            value: rootStyle.getPropertyValue('scroll-behavior'),
+            priority: rootStyle.getPropertyPriority('scroll-behavior')
+          };
+          rootStyle.setProperty('scroll-behavior', 'auto', 'important');
+
+          let startTime = null;
+          const step = timestamp => {
+            if (startTime === null) startTime = timestamp;
+            const progress = Math.min((timestamp - startTime) / duration, 1);
+            const easedProgress = 1 - Math.pow(1 - progress, 3);
+            window.scrollTo(0, Math.max(0, startY * (1 - easedProgress)));
+
+            if (progress < 1) {
+              scrollToTopFrame = requestAnimationFrame(step);
+            } else {
+              scrollToTopFrame = null;
+              restoreScrollBehavior();
+            }
+          };
+
+          scrollToTopFrame = requestAnimationFrame(step);
+        };
+
+        backToTop.addEventListener('click', () => {
+          const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          const duration = reduceMotion ? 220 : 520;
+          const baseTransform = getComputedStyle(backToTop).transform;
+          const baseShadow = getComputedStyle(backToTop).boxShadow;
+          const arrow = backToTop.querySelector('.back-to-top-arrow');
+
+          buttonPulseAnimation?.cancel();
+          arrowBounceAnimation?.cancel();
+
+          if (typeof backToTop.animate === 'function') {
+            buttonPulseAnimation = backToTop.animate([
+              { transform: baseTransform, boxShadow: baseShadow },
+              {
+                transform: `translateY(${reduceMotion ? '-2px' : '-5px'}) scale(${reduceMotion ? '1.03' : '1.1'})`,
+                boxShadow: reduceMotion
+                  ? '0 0 0 4px rgba(180, 83, 9, 0.16)'
+                  : '0 0 0 10px rgba(180, 83, 9, 0.2)',
+                offset: 0.42
+              },
+              { transform: baseTransform, boxShadow: baseShadow }
+            ], {
+              duration,
+              easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+            });
+          }
+
+          if (arrow && typeof arrow.animate === 'function') {
+            const rise = reduceMotion ? 3 : 8;
+            arrowBounceAnimation = arrow.animate([
+              { transform: 'translateY(2px)', opacity: 0.7 },
+              { transform: `translateY(-${rise}px)`, opacity: 1, offset: 0.4 },
+              { transform: 'translateY(0)', opacity: 1 }
+            ], {
+              duration,
+              easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+            });
+          }
+
+          animatePageToTop(reduceMotion ? 520 : 950);
+        });
+      }
+
+      document.addEventListener('pointerdown', event => {
+        const target = event.target.closest('button, .paper-card-interactive');
+        if (!target || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+        const rect = target.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const ripple = document.createElement('span');
+        ripple.className = 'ripple';
+        ripple.style.width = `${size}px`;
+        ripple.style.height = `${size}px`;
+        ripple.style.left = `${event.clientX - rect.left - size / 2}px`;
+        ripple.style.top = `${event.clientY - rect.top - size / 2}px`;
+
+        const position = getComputedStyle(target).position;
+        if (position === 'static') target.style.position = 'relative';
+        target.style.overflow = 'hidden';
+        target.appendChild(ripple);
+        ripple.addEventListener('animationend', () => ripple.remove());
+      });
+
+      const activePanelObserver = new MutationObserver(() => setupRevealAnimations());
+      document.querySelectorAll('.sheet-panel').forEach(panel => {
+        activePanelObserver.observe(panel, { childList: true, subtree: true });
+      });
+    }
+
+    function resetExcelModel() {
+      appState = JSON.parse(JSON.stringify(DEFAULT_MODEL));
+      const provEl = document.getElementById('param-provisional');
+      const highEl = document.getElementById('param-conf-high');
+      const medEl = document.getElementById('param-conf-med');
+      if (provEl) provEl.value = 40;
+      if (highEl) highEl.value = 70;
+      if (medEl) medEl.value = 40;
+
+      renderMethodWeights();
+      recalculateAll();
+    }
+
+    /* ========================================================================
+       10. INITIALIZATION ON WINDOW LOAD
+       ======================================================================== */
+    window.addEventListener('DOMContentLoaded', () => {
+      try {
+        renderSupplyChainStages();
+        renderTransparencyBreaks();
+        renderValueBreakdown('german_kilo');
+        selectBrazilSource('car');
+        renderLabelsAndGovernance();
+        renderMethodWeights();
+        recalculateAll();
+        setupPageEnhancements();
+        setupRevealAnimations();
+      } catch (err) {
+        console.error('Initialization error:', err);
+      }
+    });
+  </script>
+</body>
+</html>
